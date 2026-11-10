@@ -1,4 +1,4 @@
-import type { SyncRun, Transaction, TransactionList } from "@/lib/api/schemas";
+import type { CaptureOut, SyncRun, Transaction, TransactionList } from "@/lib/api/schemas";
 
 export function syncRun(overrides: Partial<SyncRun> = {}): SyncRun {
   return {
@@ -35,4 +35,15 @@ export function transaction(overrides: Partial<Transaction> = {}): Transaction {
 
 export function transactionList(items: Transaction[] = [transaction()]): TransactionList {
   return { items, total: items.length, limit: 100, offset: 0 };
+}
+
+export function captureOut(overrides: Partial<CaptureOut> = {}): CaptureOut {
+  return {
+    transaction_id: "3C679366HH908993F",
+    order_id: "ORDER1",
+    status: "completed",
+    gross: { amount: "50.00", currency: "USD" },
+    recorded: true,
+    ...overrides,
+  };
 }

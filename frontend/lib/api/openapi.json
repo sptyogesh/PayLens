@@ -192,10 +192,130 @@
           }
         }
       }
+    },
+    "/pay/orders": {
+      "post": {
+        "tags": [
+          "pay"
+        ],
+        "summary": "Post Order",
+        "operationId": "post_order_pay_orders_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayOrderIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayOrderOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pay/orders/{order_id}/capture": {
+      "post": {
+        "tags": [
+          "pay"
+        ],
+        "summary": "Post Capture",
+        "operationId": "post_capture_pay_orders__order_id__capture_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{1,32}$",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "CaptureOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "pending"
+            ],
+            "title": "Status"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "recorded": {
+            "type": "boolean",
+            "title": "Recorded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "order_id",
+          "status",
+          "gross",
+          "recorded"
+        ],
+        "title": "CaptureOut"
+      },
       "ClientRef": {
         "properties": {
           "id": {
@@ -287,6 +407,56 @@
           "currency"
         ],
         "title": "MoneyOut"
+      },
+      "PayOrderIn": {
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD",
+              "GBP",
+              "EUR",
+              "AUD"
+            ],
+            "title": "Currency"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 127
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "title": "PayOrderIn"
+      },
+      "PayOrderOut": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id"
+        ],
+        "title": "PayOrderOut"
       },
       "PeriodOut": {
         "properties": {

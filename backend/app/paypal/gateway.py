@@ -13,6 +13,7 @@ from app.common.errors import PayPalError
 from app.common.http_client import send_with_retry
 from app.paypal.auth import AUTH_FAILED_MESSAGE, TokenCache
 from app.paypal.dto import SearchPage
+from app.paypal.orders_api import CaptureResult, capture_order, create_order
 from app.paypal.transactions_api import fetch_page
 
 
@@ -20,6 +21,10 @@ class PayPalGateway(Protocol):
     """Operations PayLens needs from PayPal."""
 
     def search_transactions(self, start: datetime, end: datetime, page: int) -> SearchPage: ...
+
+    def create_order(self, amount: str, currency: str, description: str | None) -> str: ...
+
+    def capture_order(self, order_id: str) -> CaptureResult: ...
 
 
 class HttpPayPalGateway:
@@ -31,6 +36,12 @@ class HttpPayPalGateway:
 
     def search_transactions(self, start: datetime, end: datetime, page: int) -> SearchPage:
         return fetch_page(self.request, start, end, page)
+
+    def create_order(self, amount: str, currency: str, description: str | None) -> str:
+        return create_order(self.request, amount, currency, description)
+
+    def capture_order(self, order_id: str) -> CaptureResult:
+        return capture_order(self.request, order_id)
 
     def request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
         """Send with a bearer token. On 401: refresh the token once and retry (Principle VIII)."""

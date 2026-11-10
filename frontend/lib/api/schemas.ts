@@ -72,3 +72,14 @@ export const TransactionListSchema = z.object({
   offset: z.number().int(),
 });
 export type TransactionList = z.infer<typeof TransactionListSchema>;
+
+export const PayOrderOutSchema = z.object({ order_id: z.string() });
+
+export const CaptureOutSchema = z.object({
+  transaction_id: z.string(),
+  order_id: z.string(),
+  status: z.enum(["completed", "pending"]),
+  gross: MoneySchema,
+  recorded: z.boolean(),
+});
+export type CaptureOut = z.infer<typeof CaptureOutSchema>;

@@ -10,7 +10,9 @@ from typing import Any
 
 from app.common.dates import utc_now
 from app.common.money import parse_money, round_money, to_api_string
+from app.fakes.fake_orders import FakeOrders
 from app.paypal.dto import SearchPage
+from app.paypal.orders_api import CaptureResult
 from app.paypal.transactions_api import parse_page, paypal_date
 
 FAKE_PAGE_SIZE = 6
@@ -63,12 +65,20 @@ class FakePayPalGateway:
 
     def __init__(self, now: datetime | None = None) -> None:
         self.events = build_events(now or utc_now())
+        self.orders = FakeOrders()
 
     def search_transactions(self, start: datetime, end: datetime, page: int) -> SearchPage:
         in_window = [e for e in self.events if start <= self._when(e) < end]
         total_pages = (len(in_window) + FAKE_PAGE_SIZE - 1) // FAKE_PAGE_SIZE
         chunk = in_window[(page - 1) * FAKE_PAGE_SIZE : page * FAKE_PAGE_SIZE]
         return parse_page({"transaction_details": chunk, "page": page, "total_pages": total_pages})
+
+    def create_order(self, amount: str, currency: str, description: str | None) -> str:
+        return self.orders.create(amount, currency)
+
+    def capture_order(self, order_id: str) -> CaptureResult:
+        order = self.orders.orders.get(order_id, {"amount": "0.00"})
+        return self.orders.capture(order_id, fake_fee(order["amount"]), utc_now())
 
     @staticmethod
     def _when(event: dict[str, Any]) -> datetime:

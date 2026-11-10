@@ -16,7 +16,7 @@ from app.services.sync_lock import sync_lock
 from app.services.sync_service import get_last_run, run_startup_sync, start_sync
 
 
-class FailingGateway:
+class FailingGateway(FakePayPalGateway):
     def search_transactions(self, start: datetime, end: datetime, page: int) -> SearchPage:
         raise PayPalError("PayPal is not responding right now.")
 

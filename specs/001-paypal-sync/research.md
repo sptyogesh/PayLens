@@ -262,6 +262,16 @@ In the capture response, `payer.name` is an object with `given_name` and `surnam
 
 ---
 
+**Implementation note (2026-11-10, T056):** installed `@paypal/react-paypal-js` 10.6.1 (released
+2026-10-23). Its default entry point is now **JS SDK v6** (`@paypal/react-paypal-js/sdk-v6`:
+`PayPalProvider` + `PayPalOneTimePaymentButton`); the v5 `PayPalScriptProvider` API is kept as legacy.
+PayLens uses **v6**, as PayPal recommends. In v6 the currency comes from the order the backend
+creates, and the SDK environment is chosen by `environment="sandbox"` (not by the client ID), so
+the SDK is loaded once and is **not** reloaded per currency. This replaces the "keyed by currency"
+detail above. Source: the package README (`node_modules/@paypal/react-paypal-js/README.md`).
+
+---
+
 ## R8. Rate limiting for `POST /sync` and the `/pay` endpoints (owner request)
 
 **Decision**:
