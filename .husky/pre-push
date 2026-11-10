@@ -1,0 +1,4 @@
+npm run typecheck --prefix frontend
+npm run test --prefix frontend
+uv run --directory backend mypy app scripts tests
+uv run --directory backend pytest -m "not slow" -q
