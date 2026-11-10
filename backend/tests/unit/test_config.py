@@ -50,3 +50,20 @@ def test_rate_limits_cannot_be_disabled_outside_test_env() -> None:
             rate_limit_enabled=False,
             database_url=DB,
         )
+
+
+def test_fake_fx_is_refused_outside_test_env() -> None:
+    with pytest.raises(ValidationError, match="FX_MODE=fake"):
+        Settings(
+            app_env="production",
+            paypal_mode="http",
+            fx_mode="fake",
+            paypal_client_id="id",
+            paypal_client_secret="secret",
+            database_url=DB,
+        )
+
+
+def test_fx_defaults_to_frankfurter() -> None:
+    settings = Settings(app_env="test", paypal_mode="fake", database_url=DB)
+    assert settings.fx_api_url == "https://api.frankfurter.dev"

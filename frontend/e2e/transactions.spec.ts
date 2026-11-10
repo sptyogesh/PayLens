@@ -56,3 +56,32 @@ test("FR-050 seeded and synced rows show their own source badges side by side", 
   await expect(grid.getByText("PayPal sandbox")).toHaveCount(10);
   await expect(grid.getByText("Demo seed")).toHaveCount(24);
 });
+
+test("E3/E4 seeded rows show INR leakage, simulated label, and sort by total leakage", async ({
+  page,
+  request,
+}) => {
+  seedDemo();
+  const body = (await (await request.get(`${API_URL}/transactions?limit=200`)).json()) as {
+    items: { leakage: { total_leakage_inr: { amount: string } } | null }[];
+  };
+  const totals = body.items.map((item) => item.leakage?.total_leakage_inr.amount ?? "");
+  expect(totals.every((amount) => amount !== "")).toBe(true);
+  const largest = [...totals].sort((a, b) => Number(b) - Number(a))[0] ?? "";
+  const formatted = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
+    largest as Intl.StringNumericLiteral,
+  );
+
+  await page.goto("/transactions");
+  const grid = page.getByRole("region", { name: "Transactions" });
+  await expect(grid.getByText("Demo seed")).toHaveCount(24);
+  await expect(
+    grid.getByRole("columnheader", { name: /PayPal rate \(Simulated \(sandbox\)\)/ }),
+  ).toBeVisible();
+
+  const header = grid.getByRole("columnheader", { name: /^Total leakage/ });
+  await header.click();
+  await header.click();
+  await expect(header).toHaveAttribute("aria-sort", "descending");
+  await expect(grid.locator('[role="row"][aria-rowindex="2"]')).toContainText(formatted);
+});

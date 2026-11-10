@@ -1,4 +1,5 @@
 from app.common.errors import (
+    FxUnavailableError,
     PaymentDeclinedError,
     PayPalError,
     RateLimitedError,
@@ -15,6 +16,10 @@ def test_error_codes_and_statuses() -> None:
     assert PaymentDeclinedError("x").http_status == 422
     assert PayPalError("x", code="PAYPAL_AUTH_FAILED").code == "PAYPAL_AUTH_FAILED"
     assert RateLimitedError("x", retry_after_s=5).retry_after_s == 5
+    assert (FxUnavailableError("x").http_status, FxUnavailableError("x").code) == (
+        502,
+        "FX_UNAVAILABLE",
+    )
 
 
 def test_error_body_shape() -> None:

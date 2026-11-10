@@ -12,9 +12,11 @@ from app.common.constants import SYNC_DEFAULT_DAYS
 from app.common.dates import ensure_utc, utc_now
 from app.common.errors import AppError, InvalidPeriodError
 from app.common.types import SyncOutcome, SyncTrigger
+from app.fx import FxGateway
 from app.models import SyncRun
 from app.paypal.gateway import PayPalGateway
 from app.paypal.sync import SessionFactory, SyncResult, run_sync
+from app.services.leakage_service import safe_recalculate
 from app.services.sync_lock import sync_lock
 
 logger = logging.getLogger(__name__)
@@ -91,19 +93,26 @@ def get_last_run(session: Session) -> SyncRun | None:
     return session.scalar(select(SyncRun).order_by(SyncRun.started_at.desc()).limit(1))
 
 
-def run_startup_sync(factory: SessionFactory, engine: Engine, gateway: PayPalGateway) -> None:
-    """Startup sync never stops the app; its result is visible through GET /sync/last (FR-021)."""
+def run_startup_sync(
+    factory: SessionFactory, engine: Engine, gateway: PayPalGateway, fx: FxGateway
+) -> None:
+    """Startup sync never stops the app; its result is visible through GET /sync/last (FR-021).
+    Leakage is recalculated afterwards even if the sync failed (seeded rows still need it)."""
     try:
         start_sync(factory, engine, gateway, SyncTrigger.STARTUP)
     except AppError as error:
         logger.warning("Startup sync did not run: %s", error.code)
     except Exception:
         logger.exception("Startup sync failed unexpectedly")
+    safe_recalculate(factory, fx)
 
 
 def start_startup_sync_thread(
-    factory: SessionFactory, engine: Engine, gateway: PayPalGateway
+    factory: SessionFactory, engine: Engine, gateway: PayPalGateway, fx: FxGateway
 ) -> None:
     threading.Thread(
-        target=run_startup_sync, args=(factory, engine, gateway), name="startup-sync", daemon=True
+        target=run_startup_sync,
+        args=(factory, engine, gateway, fx),
+        name="startup-sync",
+        daemon=True,
     ).start()

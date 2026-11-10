@@ -388,6 +388,65 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "LeakageOut": {
+        "properties": {
+          "mid_market_rate": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d{6}$",
+            "title": "Mid Market Rate"
+          },
+          "paypal_rate": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d{6}$",
+            "title": "Paypal Rate"
+          },
+          "paypal_rate_simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Paypal Rate Simulated",
+            "default": true
+          },
+          "ideal_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "inr_received": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fee_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fx_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "total_leakage_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "leakage_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+\\.\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leakage Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mid_market_rate",
+          "paypal_rate",
+          "ideal_inr",
+          "inr_received",
+          "fee_loss_inr",
+          "fx_loss_inr",
+          "total_leakage_inr",
+          "leakage_percent"
+        ],
+        "title": "LeakageOut"
+      },
       "MoneyOut": {
         "properties": {
           "amount": {
@@ -705,6 +764,26 @@
           "is_flagged": {
             "type": "boolean",
             "title": "Is Flagged"
+          },
+          "leakage_status": {
+            "type": "string",
+            "enum": [
+              "calculated",
+              "rate_unavailable",
+              "not_calculated",
+              "not_applicable"
+            ],
+            "title": "Leakage Status"
+          },
+          "leakage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeakageOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -719,7 +798,9 @@
           "fee",
           "net",
           "source",
-          "is_flagged"
+          "is_flagged",
+          "leakage_status",
+          "leakage"
         ],
         "title": "TransactionOut"
       },

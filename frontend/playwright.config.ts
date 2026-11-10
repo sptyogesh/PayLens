@@ -28,6 +28,7 @@ export default defineConfig({
       env: {
         APP_ENV: "test",
         PAYPAL_MODE: "fake",
+        FX_MODE: "fake",
         STARTUP_SYNC_ENABLED: "false",
         RATE_LIMIT_ENABLED: "false",
         DATABASE_URL: E2E_DATABASE_URL,

@@ -11,7 +11,13 @@ from app.config import get_settings
 
 @lru_cache
 def get_engine() -> Engine:
-    return create_engine(get_settings().sqlalchemy_url, pool_pre_ping=True)
+    # No server-side prepared statements: they break when tables are recreated under a running
+    # app (E2E resets) and behind connection poolers; at demo scale they save nothing.
+    return create_engine(
+        get_settings().sqlalchemy_url,
+        pool_pre_ping=True,
+        connect_args={"prepare_threshold": None},
+    )
 
 
 @lru_cache

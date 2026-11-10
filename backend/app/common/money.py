@@ -2,7 +2,7 @@
 
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
-from app.common.constants import MONEY_PLACES
+from app.common.constants import MONEY_PLACES, PERCENT_PLACES, RATE_PLACES
 
 
 def parse_money(value: str) -> Decimal:
@@ -26,3 +26,23 @@ def round_money(amount: Decimal) -> Decimal:
 def to_api_string(amount: Decimal) -> str:
     """Format for JSON: always a string with exactly 2 decimal places."""
     return format(round_money(amount), "f")
+
+
+def round_rate(rate: Decimal) -> Decimal:
+    """Round an exchange rate to 6 decimal places with ROUND_HALF_UP."""
+    return rate.quantize(RATE_PLACES, rounding=ROUND_HALF_UP)
+
+
+def round_percent(value: Decimal) -> Decimal:
+    """Round a percentage to 2 decimal places with ROUND_HALF_UP."""
+    return value.quantize(PERCENT_PLACES, rounding=ROUND_HALF_UP)
+
+
+def to_rate_string(rate: Decimal) -> str:
+    """Format a rate for JSON: a string with exactly 6 decimal places."""
+    return format(round_rate(rate), "f")
+
+
+def to_percent_string(value: Decimal) -> str:
+    """Format a percentage for JSON: a string with exactly 2 decimal places."""
+    return format(round_percent(value), "f")

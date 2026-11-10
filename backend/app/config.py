@@ -6,7 +6,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.common.constants import PAYPAL_SANDBOX_BASE_URL
+from app.common.constants import FX_API_DEFAULT_URL, PAYPAL_SANDBOX_BASE_URL
 
 
 class Settings(BaseSettings):
@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     trust_proxy_headers: bool = False
     startup_sync_enabled: bool = True
     rate_limit_enabled: bool = True
+    fx_mode: Literal["http", "fake"] = "http"
+    fx_api_url: str = FX_API_DEFAULT_URL
 
     @model_validator(mode="after")
     def check_safety_rules(self) -> "Settings":
@@ -33,6 +35,8 @@ class Settings(BaseSettings):
             raise ValueError(f"PAYPAL_BASE_URL must be the sandbox URL {PAYPAL_SANDBOX_BASE_URL}")
         if self.paypal_mode == "http" and not (self.paypal_client_id and self.paypal_client_secret):
             raise ValueError("PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are required")
+        if self.fx_mode == "fake" and self.app_env != "test":
+            raise ValueError("FX_MODE=fake is only allowed when APP_ENV=test")
         return self
 
     @property

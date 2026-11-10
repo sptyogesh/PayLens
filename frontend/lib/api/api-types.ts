@@ -153,6 +153,26 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** LeakageOut */
+    LeakageOut: {
+      /** Mid Market Rate */
+      mid_market_rate: string;
+      /** Paypal Rate */
+      paypal_rate: string;
+      /**
+       * Paypal Rate Simulated
+       * @default true
+       * @constant
+       */
+      paypal_rate_simulated: true;
+      ideal_inr: components["schemas"]["MoneyOut"];
+      inr_received: components["schemas"]["MoneyOut"];
+      fee_loss_inr: components["schemas"]["MoneyOut"];
+      fx_loss_inr: components["schemas"]["MoneyOut"];
+      total_leakage_inr: components["schemas"]["MoneyOut"];
+      /** Leakage Percent */
+      leakage_percent: string | null;
+    };
     /** MoneyOut */
     MoneyOut: {
       /** Amount */
@@ -284,6 +304,12 @@ export interface components {
       source: components["schemas"]["TransactionSource"];
       /** Is Flagged */
       is_flagged: boolean;
+      /**
+       * Leakage Status
+       * @enum {string}
+       */
+      leakage_status: "calculated" | "rate_unavailable" | "not_calculated" | "not_applicable";
+      leakage: components["schemas"]["LeakageOut"] | null;
     };
     /**
      * TransactionSource

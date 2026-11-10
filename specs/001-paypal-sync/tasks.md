@@ -255,7 +255,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 - [X] T031 Foundation verification run: `npm run check:all`.
   - E2E has only a smoke test, `frontend/e2e/smoke.spec.ts`: the app loads, the banner is visible, and the backend `/health` is ok.
   - Fix the root cause and re-run until green. Stop and report after 3 failed attempts on the same issue.
-- [ ] T032 Request commit approval. Show:
+- [X] T032 Request commit approval. Show:
   - the verification report (constitution format)
   - the changed files
   - the proposed commit `chore: set up tooling, hooks, tests and shared modules`
@@ -365,7 +365,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 ### Verification for User Story 1
 
 - [X] T049 [US1] Verification run: `npm run check:all`. Fix the root cause and re-run until green. Stop and report after 3 failed attempts on the same issue.
-- [ ] T050 [US1] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(sync): sync PayPal sandbox transactions` and the exact command. Wait for the owner.
+- [X] T050 [US1] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(sync): sync PayPal sandbox transactions` and the exact command. Wait for the owner.
 
 **Checkpoint**: US1 works and is independently testable. M1 is demonstrable with sandbox data synced from PayPal.
 
@@ -445,7 +445,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 ### Verification for User Story 2
 
 - [X] T061 [US2] Verification run: `npm run check:all`. Fix and re-run until green. Stop and report after 3 failed attempts on the same issue.
-- [ ] T062 [US2] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(pay): add sandbox checkout page with immediate recording` and the exact command. Wait for the owner.
+- [X] T062 [US2] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(pay): add sandbox checkout page with immediate recording` and the exact command. Wait for the owner.
 
 **Checkpoint**: US1 and US2 both work independently.
 
@@ -478,7 +478,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 ### Verification for User Story 3
 
 - [X] T066 [US3] Verification run: `npm run check:all`. Fix and re-run until green. Stop and report after 3 failed attempts on the same issue.
-- [ ] T067 [US3] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(seed): add idempotent demo seed data` and the exact command. Wait for the owner.
+- [X] T067 [US3] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(seed): add idempotent demo seed data` and the exact command. Wait for the owner.
 
 **Checkpoint**: All user stories are independently functional.
 
@@ -486,7 +486,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-- [ ] T068 [P] Update `README.md`:
+- [ ] T068 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* [P] Update `README.md`:
   - tagline and description
   - "Demo mode / sandbox only" note
   - local setup (PostgreSQL 18 prerequisite, uv, npm, env files, `npm run check:all`)
@@ -496,20 +496,20 @@ Phase 1 (Setup) and Phase 2 (Foundational).
   - the Transaction Search 3 h delay
   - the seed command
   - MIT license
-- [ ] T069 Label check across the UI: a `source` badge on every row, the demo banner on every page, the sandbox notice on `/pay`, no PayPal logo as branding (FR-035, FR-050). Fix any gaps and add tests where they are missing.
-- [ ] T070 Run quickstart V2 (hooks) and V3 (fake-mode demo) by hand and note the results in the phase report. The V2 commit attempt needs the owner's approval.
-- [ ] T071 Owner-assisted sandbox checks V5–V8 from `specs/001-paypal-sync/quickstart.md`. These need the owner's sandbox accounts and can run as soon as payments exist (Transaction Search delay up to 3 h).
+- [ ] T069 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Label check across the UI: a `source` badge on every row, the demo banner on every page, the sandbox notice on `/pay`, no PayPal logo as branding (FR-035, FR-050). Fix any gaps and add tests where they are missing.
+- [ ] T070 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Run quickstart V2 (hooks) and V3 (fake-mode demo) by hand and note the results in the phase report. The V2 commit attempt needs the owner's approval.
+- [ ] T071 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Owner-assisted sandbox checks V5–V8 from `specs/001-paypal-sync/quickstart.md`. These need the owner's sandbox accounts and can run as soon as payments exist (Transaction Search delay up to 3 h).
   - Record the results in `specs/001-paypal-sync/research.md`: R1 (are the IDs equal?), R2 (the event codes for `/pay` and "Send money"), R3 (the fee sign), R4 (`page=1` is the first page).
   - If a finding contradicts the design, raise it with the owner before changing code.
-- [ ] T072 Final verification run: `npm run check:all` until green.
-- [ ] T073 Update `CHANGELOG.md` under `## [Unreleased]`:
+- [ ] T072 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Final verification run: `npm run check:all` until green.
+- [ ] T073 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Update `CHANGELOG.md` under `## [Unreleased]`:
   - `Added`: PayPal sandbox transaction sync (specs/001-paypal-sync)
   - `Added`: sandbox checkout page
   - `Added`: demo seed data
   - `Added`: project tooling, hooks, test setup
-- [ ] T074 Request commit approval. Show the verification report, the changed files, the proposed commit `docs: README and changelog for 001-paypal-sync` and the exact command. Wait for the owner.
+- [ ] T074 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Request commit approval. Show the verification report, the changed files, the proposed commit `docs: README and changelog for 001-paypal-sync` and the exact command. Wait for the owner.
   - **Push and merge to `main` each need their own separate approval.**
-- [ ] T075 After an approved push or merge and the Render deploy, run the quickstart V9 smoke test on the live URL: `/health`, Sync now, a `/pay` payment shows up, and the 4th quick Sync now gets 429. Report the results.
+- [ ] T075 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* After an approved push or merge and the Render deploy, run the quickstart V9 smoke test on the live URL: `/health`, Sync now, a `/pay` payment shows up, and the 4th quick Sync now gets 429. Report the results.
 
 ---
 
