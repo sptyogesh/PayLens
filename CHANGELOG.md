@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Demo seed history: 24 "Demo seed" transactions for 4 fictional clients over 4 months, idempotent, with `--reset` that removes only seed rows (`uv run python -m scripts.seed_demo`) (specs/001-paypal-sync)
+- `/pay` sandbox checkout (PayPal JS SDK v6): order created and captured on the backend, payment recorded at once and linked to the later Transaction Search row; rate-limited `POST /pay/orders` and capture (specs/001-paypal-sync)
+- Shared `TextField` form component (specs/001-paypal-sync)
 - PayPal sandbox sync: Sync now and on startup, ≤31-day windows with full pagination, idempotent storage, client linking, non-payment events stored but excluded from income, one sync at a time, rate-limited `POST /sync`, `GET /sync/last`, `GET /transactions` (specs/001-paypal-sync)
 - Transactions page with sync result and source-labelled grid (specs/001-paypal-sync)
 - CI workflow running `npm run check:all` with a PostgreSQL 18 service on every push and PR (specs/001-paypal-sync)

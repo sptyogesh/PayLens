@@ -379,7 +379,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 
 ### Implementation for User Story 2 (each task includes its tests)
 
-- [ ] T051 [P] [US2] Add Orders models to `backend/app/paypal/schemas.py`. If the file would pass 120 lines, split it into `schemas_search.py` and `schemas_orders.py` behind `paypal/__init__.py`.
+- [X] T051 [P] [US2] Add Orders models to `backend/app/paypal/schemas.py`. If the file would pass 120 lines, split it into `schemas_search.py` and `schemas_orders.py` behind `paypal/__init__.py`.
   - Models: `CreateOrderResponse`, `CaptureResponse`, `Capture`, `SellerReceivableBreakdown` (`gross_amount`, `paypal_fee`, `net_amount`), `OrderPayer` (`email_address`, `name.given_name`, `name.surname`, optional `address.country_code`).
   - Create `backend/app/paypal/orders_api.py`:
     - `create_order(amount, currency, description)`: `POST /v2/checkout/orders`, intent CAPTURE, `purchase_units[0].description` ≤ 127 characters
@@ -387,14 +387,14 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - Both send a UUID `PayPal-Request-Id` that stays the same across retries.
   - Add both methods to the `PayPalGateway` Protocol, `HttpPayPalGateway` and `FakePayPalGateway`. The fake is deterministic: `amount == "13.13"` gives a DECLINED capture, used by E2E.
   - Tests in `backend/tests/unit/paypal/test_orders_api.py` (respx): headers present; the same request ID on retry; parsed models.
-- [ ] T052 [P] [US2] Add `from_capture(capture_response, order_id) -> TransactionUpsert` to `backend/app/paypal/mapper.py`.
+- [X] T052 [P] [US2] Add `from_capture(capture_response, order_id) -> TransactionUpsert` to `backend/app/paypal/mapper.py`.
   - The ID is the **capture ID** (`purchase_units[0].payments.captures[0].id`), with `origin=checkout_capture`, `kind=income`, and the status mapped from the capture status.
   - fee is `abs(paypal_fee)`; net is `gross − fee`.
   - If PayPal's `net_amount` differs from `gross − fee`, set `is_flagged` with reason `NET_MISMATCH`.
   - If the breakdown is missing, set fee to `0.00` and flag `MISSING_BREAKDOWN` (research R3).
   - Country may be null.
   - Tests in `backend/tests/unit/paypal/test_mapper_capture.py`.
-- [ ] T053 [US2] Add the reconcile fallback to `backend/app/paypal/upsert.py` (research R1).
+- [X] T053 [US2] Add the reconcile fallback to `backend/app/paypal/upsert.py` (research R1).
   - When there is no ID match and the incoming row is income, look for **exactly one** row with `origin = checkout_capture`, the same `gross_amount`, `currency` and client email, and `occurred_at` within `CHECKOUT_RECONCILE_WINDOW_HOURS = 72`.
   - If exactly one is found: re-key it to the Transaction Search ID, set `origin=transaction_search`, and return `updated`.
   - If zero are found: insert. If two or more are found: insert and flag `AMBIGUOUS_RECONCILE`.
@@ -403,14 +403,14 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - different ID with one candidate: re-keyed
     - two candidates: inserted and flagged
     - outside the 72 h window: inserted
-- [ ] T054 [US2] Create `backend/app/services/checkout_service.py`.
+- [X] T054 [US2] Create `backend/app/services/checkout_service.py`.
   - `create_order(PayOrderIn) -> order_id`.
   - `capture_and_record(order_id) -> CaptureOut`:
     - a DECLINED capture or an unapproved order raises `PaymentDeclinedError`
     - on success, records the payment through `upsert_client` and `upsert_transaction` in its own transaction
     - if the DB write fails, logs the error (no raw JSON) and returns `recorded=false` (spec edge case)
   - Tests in `backend/tests/integration/services/test_checkout_service.py`, using the fake gateway: success records 1 row with source `paypal_sandbox`; declined stores nothing; a DB failure gives `recorded=false`.
-- [ ] T055 [US2] Create `backend/app/schemas/pay.py`.
+- [X] T055 [US2] Create `backend/app/schemas/pay.py`.
   - `PayOrderIn`:
     - `amount: str` matching `^\d+(\.\d{1,2})?$` with `0 < amount ≤ CHECKOUT_MAX_AMOUNT`
     - `currency` in `CHECKOUT_CURRENCIES`
@@ -422,20 +422,20 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - 422 `PAYMENT_DECLINED`
     - 429 on the 11th request within 60 s
     - no secret appears in any response
-- [ ] T056 [US2] Run `npm run gen:api`. Add zod `PayOrderInSchema` to `frontend/lib/api/schemas.ts`, mirroring the backend rules and using `CHECKOUT_CURRENCIES`/`CHECKOUT_DESCRIPTION_MAX` from constants. Add `PayOrderOutSchema`, `CaptureOutSchema` and the MSW handlers.
+- [X] T056 [US2] Run `npm run gen:api`. Add zod `PayOrderInSchema` to `frontend/lib/api/schemas.ts`, mirroring the backend rules and using `CHECKOUT_CURRENCIES`/`CHECKOUT_DESCRIPTION_MAX` from constants. Add `PayOrderOutSchema`, `CaptureOutSchema` and the MSW handlers.
   - Install `@paypal/react-paypal-js` at a pinned version, and record the supported JS SDK major in research.md R7.
-- [ ] T057 [P] [US2] Create `frontend/features/pay/PayForm.tsx`: amount, currency select, description, with field-level errors from zod. The pay button stays disabled until the form is valid (US2 scenario 4).
+- [X] T057 [P] [US2] Create `frontend/features/pay/PayForm.tsx`: amount, currency select, description, with field-level errors from zod. The pay button stays disabled until the form is valid (US2 scenario 4).
   - Test: `PayForm.test.tsx` covers each invalid case.
-- [ ] T058 [P] [US2] Create `frontend/features/pay/PayButton/`:
+- [X] T058 [P] [US2] Create `frontend/features/pay/PayButton/`:
   - `PayPalCheckoutButton.tsx`: `PayPalScriptProvider` keyed by currency, with `client-id` set to `NEXT_PUBLIC_PAYPAL_CLIENT_ID` and `currency`. `createOrder` calls the backend; `onApprove` calls capture; `onCancel`/`onError` report "No payment was made".
   - `FakeCheckoutButton.tsx`: the "Pay (test mode)" button, which calls the same backend endpoints.
   - `index.ts` picks one by `NEXT_PUBLIC_PAYPAL_MODE`.
   - Create `frontend/features/pay/usePayOrder.ts`.
   - Tests: the fake button flow with MSW; cancel shows the message.
-- [ ] T059 [US2] Create `frontend/features/pay/PayResult.tsx` (amount, currency and transaction ID; when `recorded=false`, a note that it will appear after the next sync) and `frontend/features/pay/PayView.tsx` (the parent, with `PageHeader`, the sandbox notice `Disclaimer` "Sandbox demo — no real money", and no PayPal logo as branding).
+- [X] T059 [US2] Create `frontend/features/pay/PayResult.tsx` (amount, currency and transaction ID; when `recorded=false`, a note that it will appear after the next sync) and `frontend/features/pay/PayView.tsx` (the parent, with `PageHeader`, the sandbox notice `Disclaimer` "Sandbox demo — no real money", and no PayPal logo as branding).
   - Create `frontend/features/pay/index.ts` and `frontend/app/pay/page.tsx`.
   - Tests beside each component.
-- [ ] T060 [US2] Write the E2E tests in `frontend/e2e/pay.spec.ts`:
+- [X] T060 [US2] Write the E2E tests in `frontend/e2e/pay.spec.ts`:
   - fake checkout of 50.00 USD shows a confirmation with the transaction ID, then the row appears on `/transactions` with "PayPal sandbox"
   - an invalid amount keeps the button disabled
   - amount `13.13` (declined) shows "No payment was made"
@@ -444,7 +444,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 
 ### Verification for User Story 2
 
-- [ ] T061 [US2] Verification run: `npm run check:all`. Fix and re-run until green. Stop and report after 3 failed attempts on the same issue.
+- [X] T061 [US2] Verification run: `npm run check:all`. Fix and re-run until green. Stop and report after 3 failed attempts on the same issue.
 - [ ] T062 [US2] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(pay): add sandbox checkout page with immediate recording` and the exact command. Wait for the owner.
 
 **Checkpoint**: US1 and US2 both work independently.
@@ -459,12 +459,12 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 
 ### Implementation for User Story 3 (each task includes its tests)
 
-- [ ] T063 [P] [US3] Create `backend/scripts/seed_data.py`.
+- [X] T063 [P] [US3] Create `backend/scripts/seed_data.py`.
   - 4 fictional clients with `example.com` emails: US/USD, UK/GBP, DE/EUR, AU/AUD.
   - 24 fixed transactions, `SEED-0001`…`SEED-0024`, spread over the 4 months before the current month.
   - Fees come from the `SEED_FEE_PERCENT` + `SEED_FEE_FIXED` constants (add both to `constants.py`), computed with `round_money` so that gross − fee = net.
   - Each row has `source=demo_seed`, `origin=seed`, `kind=income` and `status=completed`.
-- [ ] T064 [US3] Create `backend/scripts/seed_demo.py`, a CLI run as `python -m scripts.seed_demo [--reset]`.
+- [X] T064 [US3] Create `backend/scripts/seed_demo.py`, a CLI run as `python -m scripts.seed_demo [--reset]`.
   - It upserts by `paypal_transaction_id`, so it is idempotent.
   - `--reset` deletes only `source=demo_seed` transactions, then seed clients that have no transactions left.
   - It prints counts.
@@ -473,11 +473,11 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - the second run still gives 24
     - reset keeps `paypal_sandbox` rows
     - every row satisfies gross − fee = net
-- [ ] T065 [US3] E2E: extend `frontend/e2e/global-setup.ts` to run the seed, and add a test to `frontend/e2e/transactions.spec.ts`: the grid shows "Demo seed" and "PayPal sandbox" badges side by side after a sync (FR-050, E3 source part).
+- [X] T065 [US3] E2E: extend `frontend/e2e/global-setup.ts` to run the seed, and add a test to `frontend/e2e/transactions.spec.ts`: the grid shows "Demo seed" and "PayPal sandbox" badges side by side after a sync (FR-050, E3 source part).
 
 ### Verification for User Story 3
 
-- [ ] T066 [US3] Verification run: `npm run check:all`. Fix and re-run until green. Stop and report after 3 failed attempts on the same issue.
+- [X] T066 [US3] Verification run: `npm run check:all`. Fix and re-run until green. Stop and report after 3 failed attempts on the same issue.
 - [ ] T067 [US3] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(seed): add idempotent demo seed data` and the exact command. Wait for the owner.
 
 **Checkpoint**: All user stories are independently functional.
