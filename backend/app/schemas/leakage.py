@@ -27,6 +27,22 @@ class LeakageOut(BaseModel):
     leakage_percent: PercentString | None
 
 
+def stored_result(row: Transaction) -> LeakageResult | None:
+    """Re-derive the full result (incl. ideal INR and %) from the stored rates, or None."""
+    eligible = is_eligible(row.kind, row.status)
+    if not eligible or row.total_leakage_inr is None or row.fee_amount > row.gross_amount:
+        return None
+    data = LeakageInput(
+        gross=row.gross_amount,
+        fee=row.fee_amount,
+        currency=row.currency,
+        mid_rate=row.mid_market_rate,
+        paypal_rate=row.paypal_rate,
+    )
+    result = calculate_leakage(data)
+    return result if isinstance(result, LeakageResult) else None
+
+
 def leakage_status(row: Transaction) -> LeakageStatus:
     if not is_eligible(row.kind, row.status):
         return "not_applicable"
@@ -37,23 +53,13 @@ def leakage_status(row: Transaction) -> LeakageStatus:
 
 def leakage_out(row: Transaction) -> LeakageOut | None:
     """Ideal INR and leakage % are derived with the engine from the stored rates (research R5)."""
-    mid, paypal = row.mid_market_rate, row.paypal_rate
-    if leakage_status(row) != "calculated" or mid is None or paypal is None:
-        return None
-    data = LeakageInput(
-        gross=row.gross_amount,
-        fee=row.fee_amount,
-        currency=row.currency,
-        mid_rate=mid,
-        paypal_rate=paypal,
-    )
-    result = calculate_leakage(data)
-    if not isinstance(result, LeakageResult):  # pragma: no cover - both rates are present
+    result = stored_result(row)
+    if result is None or row.mid_market_rate is None or row.paypal_rate is None:
         return None
     percent = result.leakage_percent
     return LeakageOut(
-        mid_market_rate=to_rate_string(mid),
-        paypal_rate=to_rate_string(paypal),
+        mid_market_rate=to_rate_string(row.mid_market_rate),
+        paypal_rate=to_rate_string(row.paypal_rate),
         ideal_inr=MoneyOut.of(result.ideal_inr, INR),
         inr_received=MoneyOut.of(result.inr_received, INR),
         fee_loss_inr=MoneyOut.of(result.fee_loss_inr, INR),

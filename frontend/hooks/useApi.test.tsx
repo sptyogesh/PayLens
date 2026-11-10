@@ -58,3 +58,26 @@ describe("useApi (U8)", () => {
     });
   });
 });
+
+describe("useApi path changes", () => {
+  it("shows loading for a new path instead of the previous path's data", async () => {
+    server.use(
+      http.get(`${API}/a`, () => HttpResponse.json({ total: "1.00" })),
+      http.get(`${API}/b`, async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return HttpResponse.json({ total: "2.00" });
+      }),
+    );
+    const { result, rerender } = renderHook(({ path }) => useApi(path, Schema), {
+      initialProps: { path: "/a" },
+    });
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ status: "success", data: { total: "1.00" } });
+    });
+    rerender({ path: "/b" });
+    expect(result.current.status).toBe("loading");
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ status: "success", data: { total: "2.00" } });
+    });
+  });
+});

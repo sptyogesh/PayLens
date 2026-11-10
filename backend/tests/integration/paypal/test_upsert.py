@@ -34,12 +34,25 @@ def test_pending_then_completed_updates_the_row(db_session: Session) -> None:
     assert (stored.fee_amount, stored.net_amount) == (Decimal("4.10"), Decimal("95.90"))
 
 
-def test_update_never_touches_leakage_columns(db_session: Session) -> None:
+def test_unchanged_update_keeps_leakage_columns(db_session: Session) -> None:
     upsert_transaction(db_session, dto(row("A")))
     stored = db_session.scalars(select(Transaction)).one()
     stored.fee_loss_inr = Decimal("330.00")
     upsert_transaction(db_session, dto(row("A")))
     assert stored.fee_loss_inr == Decimal("330.00")
+
+
+def test_changed_amounts_clear_stale_leakage(db_session: Session) -> None:
+    upsert_transaction(db_session, dto(row("A")))
+    stored = db_session.scalars(select(Transaction)).one()
+    stored.fee_loss_inr = stored.total_leakage_inr = Decimal("330.00")
+    stored.mid_market_rate = Decimal("84.000000")
+    upsert_transaction(db_session, dto(row("A", fee="-4.10")))
+    db_session.flush()
+    db_session.refresh(stored)
+    assert stored.fee_loss_inr is None
+    assert stored.total_leakage_inr is None
+    assert stored.mid_market_rate is None
 
 
 def test_clients_are_linked_by_email(db_session: Session) -> None:

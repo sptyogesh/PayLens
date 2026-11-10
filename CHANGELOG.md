@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Per-payment leakage in INR (Phase 1A plan section 10): fee loss, FX loss (gains shown as gains), total leakage and leakage %, recalculated after sync, demo seed and `/pay`; "Rate unavailable" instead of numbers when no rate exists (specs/002-leakage-dashboard)
 - Mid-market FX rates from Frankfurter (ECB reference rates, keyless), cached in a new `fx_rates` table; PayPal rate simulated as mid-market minus a 3% spread and labelled "Simulated (sandbox)"; `FX_MODE` / `FX_API_URL` settings (specs/002-leakage-dashboard)
 - Leakage columns in the transactions grid with exact sorting (specs/002-leakage-dashboard)
+- Leakage dashboard on the home page: five summary cards (total income INR, fee loss, FX loss, total leakage, leakage %), period filter (this month, last 3 months, all time, in IST), notes for payments without a rate and the simulated rate; `GET /dashboard?period=` (specs/002-leakage-dashboard)
+- Shared `StatCard` and `SegmentedControl` UI components (specs/002-leakage-dashboard)
 - Demo seed history: 24 "Demo seed" transactions for 4 fictional clients over 4 months, idempotent, with `--reset` that removes only seed rows (`uv run python -m scripts.seed_demo`) (specs/001-paypal-sync)
 - `/pay` sandbox checkout (PayPal JS SDK v6): order created and captured on the backend, payment recorded at once and linked to the later Transaction Search row; rate-limited `POST /pay/orders` and capture (specs/001-paypal-sync)
 - Shared `TextField` form component (specs/001-paypal-sync)

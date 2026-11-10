@@ -71,3 +71,20 @@ class Transaction(IdMixin, TimestampMixin, Base):
     fira_status: Mapped[FiraStatus | None] = mapped_column(pg_enum(FiraStatus, "fira_status"))
 
     client: Mapped[Client] = relationship(lazy="joined")
+
+    def leakage_inputs(self) -> tuple[object, ...]:
+        """The fields leakage depends on; when any of them changes, leakage is stale."""
+        return (
+            self.kind,
+            self.status,
+            self.gross_amount,
+            self.fee_amount,
+            self.currency,
+            self.occurred_at,
+        )
+
+    def clear_leakage(self) -> None:
+        """Remove calculated leakage; the next recalculation fills it again (002 FR-020)."""
+        self.mid_market_rate = self.paypal_rate = None
+        self.inr_received = self.fee_loss_inr = None
+        self.fx_loss_inr = self.total_leakage_inr = None

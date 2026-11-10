@@ -25,3 +25,10 @@ export function resetDatabase(): void {
 export function seedDemo(): void {
   runBackendScript("scripts.seed_demo");
 }
+
+/** The app's ₹ display format (en-IN), for comparing API amounts with the screen. */
+export function formatInr(amount: string): string {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
+    amount as Intl.StringNumericLiteral,
+  );
+}

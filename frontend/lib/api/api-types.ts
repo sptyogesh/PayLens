@@ -72,6 +72,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/dashboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Dashboard */
+    get: operations["dashboard_dashboard_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/pay/orders": {
     parameters: {
       query?: never;
@@ -110,6 +127,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** BreakdownRowOut */
+    BreakdownRowOut: {
+      /** Key */
+      key: string;
+      /** Label */
+      label: string;
+      totals: components["schemas"]["TotalsOut"];
+    };
     /** CaptureOut */
     CaptureOut: {
       /** Transaction Id */
@@ -147,6 +172,44 @@ export interface components {
       skipped: number;
       /** Flagged */
       flagged: number;
+    };
+    /** DashboardOut */
+    DashboardOut: {
+      period: components["schemas"]["DashboardPeriodOut"];
+      totals: components["schemas"]["TotalsOut"] | null;
+      /** Excluded Count */
+      excluded_count: number;
+      /** Not Calculated Count */
+      not_calculated_count: number;
+      /** Sources */
+      sources: components["schemas"]["TransactionSource"][];
+      /**
+       * Paypal Rate Simulated
+       * @default true
+       * @constant
+       */
+      paypal_rate_simulated: true;
+      /** Simulated Spread Percent */
+      simulated_spread_percent: string;
+      /** By Month */
+      by_month: components["schemas"]["BreakdownRowOut"][];
+      /** By Client */
+      by_client: components["schemas"]["BreakdownRowOut"][];
+    };
+    /**
+     * DashboardPeriod
+     * @enum {string}
+     */
+    DashboardPeriod: "this_month" | "last_3_months" | "all_time";
+    /** DashboardPeriodOut */
+    DashboardPeriodOut: {
+      key: components["schemas"]["DashboardPeriod"];
+      /** Label */
+      label: string;
+      /** Start */
+      start: string | null;
+      /** End */
+      end: string | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -257,6 +320,17 @@ export interface components {
      * @enum {string}
      */
     SyncTrigger: "manual" | "startup";
+    /** TotalsOut */
+    TotalsOut: {
+      /** Payment Count */
+      payment_count: number;
+      income_inr: components["schemas"]["MoneyOut"];
+      fee_loss_inr: components["schemas"]["MoneyOut"];
+      fx_loss_inr: components["schemas"]["MoneyOut"];
+      total_leakage_inr: components["schemas"]["MoneyOut"];
+      /** Leakage Percent */
+      leakage_percent: string | null;
+    };
     /**
      * TransactionKind
      * @enum {string}
@@ -446,6 +520,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TransactionListOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  dashboard_dashboard_get: {
+    parameters: {
+      query?: {
+        period?: components["schemas"]["DashboardPeriod"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DashboardOut"];
         };
       };
       /** @description Validation Error */

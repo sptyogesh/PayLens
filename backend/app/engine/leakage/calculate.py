@@ -4,7 +4,8 @@
     INR received = N x r_pp           FX loss  = N x (r_mid - r_pp)
     total        = fee loss + FX loss (= ideal - received)
 
-Rounding happens only on the returned values (Principle III).
+Rounding happens only on the returned values (Principle III). INR received is returned as
+ideal - total so that every shown identity holds to the paisa; it is within Rs 0.015 of N x r_pp.
 """
 
 from decimal import Decimal
@@ -25,9 +26,14 @@ def paypal_rate_for(currency: str, mid_rate: Decimal) -> Decimal:
     return mid_rate if currency == INR else simulated_paypal_rate(mid_rate)
 
 
+# The one place that says which transactions have leakage (P8): completed income only.
+ELIGIBLE_KIND = TransactionKind.INCOME
+ELIGIBLE_STATUS = TransactionStatus.COMPLETED
+
+
 def is_eligible(kind: TransactionKind, status: TransactionStatus) -> bool:
     """Only completed income has leakage; other events are stored but not analysed (P8)."""
-    return kind is TransactionKind.INCOME and status is TransactionStatus.COMPLETED
+    return kind is ELIGIBLE_KIND and status is ELIGIBLE_STATUS
 
 
 def leakage_percent(total: Decimal, ideal: Decimal) -> Decimal | None:
@@ -40,17 +46,23 @@ def leakage_percent(total: Decimal, ideal: Decimal) -> Decimal | None:
 def calculate_leakage(data: LeakageInput) -> LeakageResult | RateUnavailable:
     if data.mid_rate is None or data.paypal_rate is None:
         return RateUnavailable()
-    mid, paypal, net = data.mid_rate, data.paypal_rate, data.net
+    mid, paypal, net = data.mid_rate, data.paypal_rate, data.net  # net feeds only FX loss
     ideal = data.gross * mid
     fee_loss = data.fee * mid
     fx_loss = net * (mid - paypal)
-    # The total is rounded from the exact sum, so |total - (ideal - received)| <= 0.01 (L10).
-    total = fee_loss + fx_loss
+    # Shown values must add up exactly: total = fee loss + FX loss, received = ideal - total.
+    # Each stays within Rs 0.01 of its exact section 10 value (L10, research R5).
+    ideal_inr, fee_loss_inr, fx_loss_inr = (
+        round_money(ideal),
+        round_money(fee_loss),
+        round_money(fx_loss),
+    )
+    total_inr = fee_loss_inr + fx_loss_inr
     return LeakageResult(
-        ideal_inr=round_money(ideal),
-        inr_received=round_money(net * paypal),
-        fee_loss_inr=round_money(fee_loss),
-        fx_loss_inr=round_money(fx_loss),
-        total_leakage_inr=round_money(total),
-        leakage_percent=leakage_percent(total, ideal),
+        ideal_inr=ideal_inr,
+        inr_received=ideal_inr - total_inr,
+        fee_loss_inr=fee_loss_inr,
+        fx_loss_inr=fx_loss_inr,
+        total_leakage_inr=total_inr,
+        leakage_percent=leakage_percent(fee_loss + fx_loss, ideal),
     )

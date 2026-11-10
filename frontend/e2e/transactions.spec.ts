@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { API_URL, resetDatabase, seedDemo } from "./support/db";
+import { API_URL, formatInr, resetDatabase, seedDemo } from "./support/db";
 
 test.beforeEach(() => {
   resetDatabase();
@@ -68,9 +68,7 @@ test("E3/E4 seeded rows show INR leakage, simulated label, and sort by total lea
   const totals = body.items.map((item) => item.leakage?.total_leakage_inr.amount ?? "");
   expect(totals.every((amount) => amount !== "")).toBe(true);
   const largest = [...totals].sort((a, b) => Number(b) - Number(a))[0] ?? "";
-  const formatted = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
-    largest as Intl.StringNumericLiteral,
-  );
+  const formatted = formatInr(largest);
 
   await page.goto("/transactions");
   const grid = page.getByRole("region", { name: "Transactions" });

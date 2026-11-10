@@ -1,3 +1,4 @@
+import type { BreakdownRow, Dashboard, Totals } from "@/lib/api/dashboard-schemas";
 import type { CaptureOut, Leakage, SyncRun, Transaction, TransactionList } from "@/lib/api/schemas";
 
 export function syncRun(overrides: Partial<SyncRun> = {}): SyncRun {
@@ -64,6 +65,42 @@ export function captureOut(overrides: Partial<CaptureOut> = {}): CaptureOut {
     status: "completed",
     gross: { amount: "50.00", currency: "USD" },
     recorded: true,
+    ...overrides,
+  };
+}
+
+export function totals(overrides: Partial<Totals> = {}): Totals {
+  return {
+    payment_count: 2,
+    income_inr: inr("16800.00"),
+    fee_loss_inr: inr("789.60"),
+    fx_loss_inr: inr("480.32"),
+    total_leakage_inr: inr("1269.92"),
+    leakage_percent: "7.56",
+    ...overrides,
+  };
+}
+
+export function breakdownRow(key: string, label: string, rowTotals = totals()): BreakdownRow {
+  return { key, label, totals: rowTotals };
+}
+
+export function dashboard(overrides: Partial<Dashboard> = {}): Dashboard {
+  return {
+    period: {
+      key: "last_3_months",
+      label: "Last 3 months",
+      start: "2026-08-31T18:30:00Z",
+      end: "2026-11-10T09:00:00Z",
+    },
+    totals: totals(),
+    excluded_count: 0,
+    not_calculated_count: 0,
+    sources: ["demo_seed", "paypal_sandbox"],
+    paypal_rate_simulated: true,
+    simulated_spread_percent: "3.00",
+    by_month: [breakdownRow("2026-11", "Nov 2026")],
+    by_client: [breakdownRow("c-1", "Ava Stone")],
     ...overrides,
   };
 }

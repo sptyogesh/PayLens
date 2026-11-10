@@ -2,6 +2,12 @@
 
 from fastapi import APIRouter
 
-from app.api.routes import health, pay, sync, transactions
+from app.api.routes import dashboard, health, pay, sync, transactions
 
-ROUTERS: list[APIRouter] = [health.router, sync.router, transactions.router, pay.router]
+ROUTERS: list[APIRouter] = [
+    health.router,
+    sync.router,
+    transactions.router,
+    dashboard.router,
+    pay.router,
+]

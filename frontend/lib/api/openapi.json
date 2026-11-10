@@ -193,6 +193,48 @@
         }
       }
     },
+    "/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Dashboard",
+        "operationId": "dashboard_dashboard_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DashboardPeriod",
+              "default": "last_3_months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pay/orders": {
       "post": {
         "tags": [
@@ -280,6 +322,28 @@
   },
   "components": {
     "schemas": {
+      "BreakdownRowOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TotalsOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "totals"
+        ],
+        "title": "BreakdownRowOut"
+      },
       "CaptureOut": {
         "properties": {
           "transaction_id": {
@@ -374,6 +438,127 @@
           "flagged"
         ],
         "title": "CountsOut"
+      },
+      "DashboardOut": {
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/DashboardPeriodOut"
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TotalsOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "excluded_count": {
+            "type": "integer",
+            "title": "Excluded Count"
+          },
+          "not_calculated_count": {
+            "type": "integer",
+            "title": "Not Calculated Count"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "paypal_rate_simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Paypal Rate Simulated",
+            "default": true
+          },
+          "simulated_spread_percent": {
+            "type": "string",
+            "pattern": "^-?\\d+\\.\\d{2}$",
+            "title": "Simulated Spread Percent"
+          },
+          "by_month": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Month"
+          },
+          "by_client": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Client"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "totals",
+          "excluded_count",
+          "not_calculated_count",
+          "sources",
+          "simulated_spread_percent",
+          "by_month",
+          "by_client"
+        ],
+        "title": "DashboardOut"
+      },
+      "DashboardPeriod": {
+        "type": "string",
+        "enum": [
+          "this_month",
+          "last_3_months",
+          "all_time"
+        ],
+        "title": "DashboardPeriod"
+      },
+      "DashboardPeriodOut": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/DashboardPeriod"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "start",
+          "end"
+        ],
+        "title": "DashboardPeriodOut"
       },
       "HTTPValidationError": {
         "properties": {
@@ -678,6 +863,48 @@
           "startup"
         ],
         "title": "SyncTrigger"
+      },
+      "TotalsOut": {
+        "properties": {
+          "payment_count": {
+            "type": "integer",
+            "title": "Payment Count"
+          },
+          "income_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fee_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fx_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "total_leakage_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "leakage_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+\\.\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leakage Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_count",
+          "income_inr",
+          "fee_loss_inr",
+          "fx_loss_inr",
+          "total_leakage_inr",
+          "leakage_percent"
+        ],
+        "title": "TotalsOut"
       },
       "TransactionKind": {
         "type": "string",

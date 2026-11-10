@@ -51,9 +51,12 @@ def upsert_seed_transaction(
         row = Transaction(paypal_transaction_id=seed_id, origin=TransactionOrigin.SEED)
         session.add(row)
     fee = seed_fee(gross, client.currency)
+    before = row.leakage_inputs()
     row.client_id, row.occurred_at, row.currency = client.id, when, client.currency
     row.kind, row.status, row.source = TransactionKind.INCOME, TransactionStatus.COMPLETED, SEED
     row.gross_amount, row.fee_amount, row.net_amount = gross, fee, gross - fee
+    if row.leakage_inputs() != before:
+        row.clear_leakage()
     return added
 
 
