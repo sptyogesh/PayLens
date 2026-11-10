@@ -67,3 +67,23 @@ def test_fake_fx_is_refused_outside_test_env() -> None:
 def test_fx_defaults_to_frankfurter() -> None:
     settings = Settings(app_env="test", paypal_mode="fake", database_url=DB)
     assert settings.fx_api_url == "https://api.frankfurter.dev"
+
+
+def test_fake_llm_is_refused_outside_test_env() -> None:
+    with pytest.raises(ValidationError, match="LLM_MODE=fake"):
+        Settings(
+            app_env="production",
+            paypal_mode="http",
+            fx_mode="http",
+            llm_mode="fake",
+            paypal_client_id="id",
+            paypal_client_secret="secret",
+            database_url=DB,
+        )
+
+
+def test_http_llm_requires_a_key() -> None:
+    with pytest.raises(ValidationError, match="LLM_API_KEY"):
+        Settings(
+            app_env="test", paypal_mode="fake", fx_mode="fake", llm_mode="http", database_url=DB
+        )

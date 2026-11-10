@@ -1,6 +1,5 @@
 """One Transaction Search page: GET /v1/reporting/transactions (research R4)."""
 
-import json
 from collections.abc import Callable
 from datetime import datetime
 from typing import Any
@@ -12,6 +11,7 @@ from app.common.constants import PAYPAL_PAGE_SIZE
 from app.common.dates import ensure_utc
 from app.common.errors import PayPalError
 from app.paypal.dto import SearchPage, SearchRow
+from app.paypal.responses import json_body
 from app.paypal.schemas import SearchResponse
 
 SEARCH_PATH = "/v1/reporting/transactions"
@@ -41,7 +41,7 @@ def search_params(start: datetime, end: datetime, page: int) -> dict[str, str | 
 UNEXPECTED_FORMAT_MESSAGE = "PayPal returned transaction data in an unexpected format."
 
 
-def parse_page(payload: dict[str, Any]) -> SearchPage:
+def parse_page(payload: Any) -> SearchPage:
     try:
         response = SearchResponse.model_validate(payload)
     except ValidationError as error:
@@ -58,4 +58,4 @@ def fetch_page(request: Request, start: datetime, end: datetime, page: int) -> S
     response = request("GET", SEARCH_PATH, params=search_params(start, end, page))
     if response.status_code != httpx.codes.OK:
         raise PayPalError(REJECTED_MESSAGE, code="PAYPAL_REJECTED")
-    return parse_page(json.loads(response.content))
+    return parse_page(json_body(response, UNEXPECTED_FORMAT_MESSAGE))

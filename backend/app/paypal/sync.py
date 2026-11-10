@@ -8,11 +8,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.common.constants import PAYPAL_FIRST_PAGE, PAYPAL_MAX_PAGES_PER_WINDOW, PAYPAL_WINDOW_DAYS
 from app.common.dates import split_windows
-from app.common.errors import AppError
+from app.common.errors import AppError, PayPalError
 from app.paypal.classify import counts_as_income
 from app.paypal.dto import SearchRow, TransactionUpsert
 from app.paypal.gateway import PayPalGateway
@@ -22,6 +23,9 @@ from app.paypal.upsert import upsert_transaction
 logger = logging.getLogger(__name__)
 
 SessionFactory = Callable[[], Session]
+STORE_FAILED_MESSAGE = "PayLens could not save the synced payments. Please try again."
+BAD_DATA_MESSAGE = "PayPal returned transaction data in an unexpected format."
+HANDLED_ERRORS = (AppError, SQLAlchemyError, ValueError)
 
 
 @dataclass
@@ -85,22 +89,40 @@ def sync_window(
     store(session, select_rows(rows, result), result)
 
 
+def window_error(error: Exception) -> AppError:
+    """The safe, coded error recorded for a failed window (earlier windows stay stored)."""
+    if isinstance(error, AppError):
+        return error
+    if isinstance(error, SQLAlchemyError):
+        return AppError(STORE_FAILED_MESSAGE, code="SYNC_STORE_FAILED")
+    return PayPalError(BAD_DATA_MESSAGE, code="PAYPAL_REJECTED")  # bad JSON or field values
+
+
 def run_sync(
-    session_factory: SessionFactory, gateway: PayPalGateway, start: datetime, end: datetime
+    session_factory: SessionFactory,
+    gateway: PayPalGateway,
+    start: datetime,
+    end: datetime,
+    result: SyncResult | None = None,
 ) -> SyncResult:
+    """Sync window by window into `result` (pass one in to keep it if an unexpected error is
+    re-raised). Known failures stop the run and are recorded in `result.error`."""
     windows = split_windows(start, end, PAYPAL_WINDOW_DAYS)
-    result = SyncResult(windows_total=len(windows))
+    result = SyncResult() if result is None else result
+    result.windows_total = len(windows)
     for window in windows:
         with session_factory() as session:
             snapshot = (result.added, result.updated, result.skipped, result.flagged)
             try:
                 sync_window(session, gateway, window, result)
                 session.commit()
-            except AppError as error:
+            except Exception as error:
                 session.rollback()
                 result.added, result.updated, result.skipped, result.flagged = snapshot
-                result.error = error
-                logger.error("Sync window failed: %s", error.code)
+                if not isinstance(error, HANDLED_ERRORS):
+                    raise
+                result.error = window_error(error)
+                logger.error("Sync window failed: %s (%s)", result.error.code, type(error).__name__)
                 return result
         result.windows_done += 1
     return result

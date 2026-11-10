@@ -19,7 +19,7 @@ export function parseWith<T>(schema: z.ZodType<T>, data: unknown): T | null {
   return result.success ? result.data : null;
 }
 
-const IsoDateTime = z.iso.datetime({ offset: true });
+export const IsoDateTime = z.iso.datetime({ offset: true });
 
 export const SyncRunSchema = z.object({
   id: z.string(),
@@ -66,6 +66,10 @@ export const LeakageStatusSchema = z.enum([
 ]);
 export type LeakageStatus = z.infer<typeof LeakageStatusSchema>;
 
+/** FIRA badge on a payment row (specs/004-fira-matching); null for rows without a badge. */
+export const FiraBadgeStatusSchema = z.enum(["matched", "needs_review", "missing"]);
+export type FiraBadgeStatus = z.infer<typeof FiraBadgeStatusSchema>;
+
 export const TransactionSchema = z.object({
   id: z.string(),
   paypal_transaction_id: z.string(),
@@ -89,6 +93,7 @@ export const TransactionSchema = z.object({
   is_flagged: z.boolean(),
   leakage_status: LeakageStatusSchema,
   leakage: LeakageSchema.nullable(),
+  fira_status: FiraBadgeStatusSchema.nullable(),
 });
 export type Transaction = z.infer<typeof TransactionSchema>;
 

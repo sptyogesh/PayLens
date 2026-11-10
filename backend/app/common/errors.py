@@ -68,6 +68,20 @@ class FxUnavailableError(AppError):
     code = "FX_UNAVAILABLE"
 
 
+class LlmUnavailableError(AppError):
+    """The AI service timed out, was overloaded or failed. The chat answers with a fallback."""
+
+    http_status = 502
+    code = "LLM_UNAVAILABLE"
+
+
+class LlmConfigError(AppError):
+    """The AI service rejected the request (bad key, model or body). Logged without the key."""
+
+    http_status = 502
+    code = "LLM_CONFIG_ERROR"
+
+
 class RateLimitedError(AppError):
     http_status = 429
     code = "RATE_LIMITED"
@@ -101,7 +115,13 @@ async def handle_validation_error(_request: Request, _error: Exception) -> JSONR
 
 
 async def handle_unexpected_error(request: Request, error: Exception) -> JSONResponse:
-    logger.error("Unhandled error on %s %s: %r", request.method, request.url.path, error)
+    logger.exception(
+        "Unhandled error on %s %s: %s",
+        request.method,
+        request.url.path,
+        type(error).__name__,
+        exc_info=error,
+    )
     return JSONResponse(
         status_code=500, content=error_body("INTERNAL_ERROR", INTERNAL_ERROR_MESSAGE)
     )

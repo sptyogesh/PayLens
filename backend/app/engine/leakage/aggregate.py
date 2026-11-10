@@ -11,12 +11,16 @@ from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 
 from app.common.constants import MONTH_LABEL_FORMAT
+from app.common.types import Money
 from app.engine.leakage.calculate import leakage_percent
 from app.engine.leakage.types import LeakageResult
 
 
 class LeakageRow(BaseModel):
-    """One calculated payment with the keys it is grouped by. `month` is "YYYY-MM" (IST)."""
+    """One calculated payment with the keys it is grouped by. `month` is "YYYY-MM" (IST).
+
+    `gross` is the original payment amount; only the by-currency views need it.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -24,6 +28,7 @@ class LeakageRow(BaseModel):
     client_key: str
     client_label: str
     result: LeakageResult
+    gross: Money | None = None
 
 
 class LeakageTotals(BaseModel):
@@ -84,3 +89,24 @@ def by_client(rows: Iterable[LeakageRow]) -> list[GroupTotals]:
     """Highest total leakage first; ties by name."""
     clients = group(rows, lambda row: (row.client_key, row.client_label))
     return sorted(clients, key=lambda g: (-g.totals.total_leakage_inr, g.label, g.key))
+
+
+def _gross(row: LeakageRow) -> Money:
+    if row.gross is None:
+        raise ValueError("by-currency views need the original gross amount on every row")
+    return row.gross
+
+
+def by_currency(rows: Iterable[LeakageRow]) -> list[GroupTotals]:
+    """One group per original payment currency, sorted by currency code."""
+    currencies = group(rows, lambda row: (_gross(row).currency, _gross(row).currency))
+    return sorted(currencies, key=lambda g: g.key)
+
+
+def gross_by_currency(rows: Iterable[LeakageRow]) -> list[Money]:
+    """Sum of original gross amounts per currency (never mixed), sorted by currency code."""
+    sums: dict[str, Decimal] = {}
+    for row in rows:
+        gross = _gross(row)
+        sums[gross.currency] = sums.get(gross.currency, Decimal(0)) + gross.amount
+    return [Money(amount=amount, currency=code) for code, amount in sorted(sums.items())]

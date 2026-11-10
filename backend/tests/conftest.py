@@ -33,6 +33,7 @@ MISSING_DB_MESSAGE = "Set TEST_DATABASE_URL to a PostgreSQL 18 database (see qui
 os.environ["APP_ENV"] = "test"
 os.environ["PAYPAL_MODE"] = "fake"
 os.environ["FX_MODE"] = "fake"
+os.environ["LLM_MODE"] = "fake"
 os.environ["STARTUP_SYNC_ENABLED"] = "false"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL or "postgresql+psycopg://localhost/missing"
 os.environ["FRONTEND_URL"] = "http://frontend.test"
@@ -42,7 +43,7 @@ from app.config import Settings, get_settings  # noqa: E402
 
 # Tests never read backend/.env, so real sandbox credentials can't leak into a test run.
 Settings.model_config["env_file"] = None
-for key in ("PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"):
+for key in ("PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "LLM_API_KEY", "LLM_MODEL"):
     os.environ.pop(key, None)
 from app.models import Base  # noqa: E402
 

@@ -123,6 +123,91 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/chat": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Post Chat */
+    post: operations["post_chat_chat_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/fira/upload": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Post Fira Upload */
+    post: operations["post_fira_upload_fira_upload_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/fira": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Firas */
+    get: operations["get_firas_fira_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/report/data": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Report Data */
+    get: operations["report_data_report_data_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/report.pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Report Pdf */
+    get: operations["report_pdf_report_pdf_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -149,6 +234,41 @@ export interface components {
       gross: components["schemas"]["MoneyOut"];
       /** Recorded */
       recorded: boolean;
+    };
+    /** ChatIn */
+    ChatIn: {
+      /** Question */
+      question: string;
+      /** History */
+      history?: components["schemas"]["ChatTurn"][];
+    };
+    /** ChatOut */
+    ChatOut: {
+      /** Answer */
+      answer: string;
+      /**
+       * Outcome
+       * @enum {string}
+       */
+      outcome: "answered" | "no_data" | "fallback";
+      /** Periods */
+      periods: string[];
+      /** Figures */
+      figures: components["schemas"]["FigureOut"][];
+      /** Disclaimer */
+      disclaimer: string | null;
+      /** Tools Used */
+      tools_used: string[];
+    };
+    /** ChatTurn */
+    ChatTurn: {
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: "user" | "assistant";
+      /** Content */
+      content: string;
     };
     /** ClientRef */
     ClientRef: {
@@ -211,6 +331,127 @@ export interface components {
       /** End */
       end: string | null;
     };
+    /**
+     * FigureOut
+     * @description A figure behind the answer, copied from a tool result by code (FR-005).
+     */
+    FigureOut: {
+      /** Label */
+      label: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "money" | "count" | "percent";
+      /** Value */
+      value: string;
+      /** Currency */
+      currency: string | null;
+      /** Period */
+      period: string;
+    };
+    /**
+     * FiraDocStatus
+     * @enum {string}
+     */
+    FiraDocStatus: "matched" | "needs_review" | "no_match";
+    /** FiraItemOut */
+    FiraItemOut: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** File Name */
+      file_name: string;
+      status: components["schemas"]["FiraDocStatus"];
+      /** Score */
+      score: number | null;
+      /** Reason */
+      reason: string | null;
+      foreign_amount: components["schemas"]["MoneyOut"] | null;
+      inr_amount: components["schemas"]["MoneyOut"] | null;
+      /** Rate */
+      rate: string | null;
+      /** Remittance Date */
+      remittance_date: string | null;
+      /** Reference No */
+      reference_no: string | null;
+      /** Remitter */
+      remitter: string | null;
+      /** Purpose Code */
+      purpose_code: string | null;
+      /**
+       * Uploaded At
+       * Format: date-time
+       */
+      uploaded_at: string;
+      /** Matches */
+      matches: components["schemas"]["FiraMatchOut"][];
+    };
+    /** FiraListOut */
+    FiraListOut: {
+      summary: components["schemas"]["FiraSummaryOut"];
+      /** Items */
+      items: components["schemas"]["FiraItemOut"][];
+      /** Missing */
+      missing: components["schemas"]["FiraPaymentOut"][];
+    };
+    /**
+     * FiraMatchKind
+     * @enum {string}
+     */
+    FiraMatchKind: "direct" | "weekly";
+    /** FiraMatchOut */
+    FiraMatchOut: {
+      /**
+       * Transaction Id
+       * Format: uuid
+       */
+      transaction_id: string;
+      /** Paypal Transaction Id */
+      paypal_transaction_id: string;
+      /** Score */
+      score: number;
+      kind: components["schemas"]["FiraMatchKind"];
+    };
+    /**
+     * FiraPaymentOut
+     * @description An eligible payment (used for the "missing FIRA" list).
+     */
+    FiraPaymentOut: {
+      /**
+       * Transaction Id
+       * Format: uuid
+       */
+      transaction_id: string;
+      /** Paypal Transaction Id */
+      paypal_transaction_id: string;
+      /**
+       * Date
+       * Format: date
+       */
+      date: string;
+      /** Client */
+      client: string;
+      gross: components["schemas"]["MoneyOut"];
+    };
+    /**
+     * FiraStatus
+     * @enum {string}
+     */
+    FiraStatus: "matched" | "needs_review" | "missing";
+    /** FiraSummaryOut */
+    FiraSummaryOut: {
+      /** Matched */
+      matched: number;
+      /** Needs Review */
+      needs_review: number;
+      /** No Match */
+      no_match: number;
+      /** Missing Payments */
+      missing_payments: number;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -272,6 +513,73 @@ export interface components {
        * Format: date-time
        */
       end: string;
+    };
+    /** ReportData */
+    ReportData: {
+      period: components["schemas"]["DashboardPeriodOut"];
+      /**
+       * Generated At
+       * Format: date-time
+       */
+      generated_at: string;
+      totals: components["schemas"]["TotalsOut"] | null;
+      /** Gross By Currency */
+      gross_by_currency: components["schemas"]["MoneyOut"][];
+      /** By Month */
+      by_month: components["schemas"]["BreakdownRowOut"][];
+      /** By Client */
+      by_client: components["schemas"]["BreakdownRowOut"][];
+      /** Excluded Count */
+      excluded_count: number;
+      /** Not Calculated Count */
+      not_calculated_count: number;
+      /** Simulated Spread Percent */
+      simulated_spread_percent: string;
+      fira: components["schemas"]["ReportFira"];
+      /** Notes */
+      notes: string[];
+      /** Disclaimer */
+      disclaimer: string;
+      summary: components["schemas"]["ReportSummary"];
+    };
+    /**
+     * ReportFira
+     * @description FIRA status of the eligible payments in the period; `uploaded` counts every FIRA stored.
+     */
+    ReportFira: {
+      /** Uploaded */
+      uploaded: number;
+      /** Matched */
+      matched: number;
+      /** Needs Review */
+      needs_review: number;
+      /** Missing */
+      missing: number;
+      /** Missing Payments */
+      missing_payments: components["schemas"]["ReportMissingPayment"][];
+    };
+    /** ReportMissingPayment */
+    ReportMissingPayment: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string;
+      /** Client */
+      client: string;
+      /** Paypal Transaction Id */
+      paypal_transaction_id: string;
+      gross: components["schemas"]["MoneyOut"];
+    };
+    /** ReportSummary */
+    ReportSummary: {
+      /** Text */
+      text: string;
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: "ai" | "code";
     };
     /** SyncErrorOut */
     SyncErrorOut: {
@@ -384,6 +692,7 @@ export interface components {
        */
       leakage_status: "calculated" | "rate_unavailable" | "not_calculated" | "not_applicable";
       leakage: components["schemas"]["LeakageOut"] | null;
+      fira_status: components["schemas"]["FiraStatus"] | null;
     };
     /**
      * TransactionSource
@@ -395,6 +704,29 @@ export interface components {
      * @enum {string}
      */
     TransactionStatus: "completed" | "pending" | "denied" | "reversed";
+    /**
+     * UploadFileOut
+     * @description What happened to one uploaded file. `status` is set only when it was stored.
+     */
+    UploadFileOut: {
+      /** File Name */
+      file_name: string;
+      /**
+       * Outcome
+       * @enum {string}
+       */
+      outcome: "stored" | "duplicate" | "rejected" | "failed";
+      /** Message */
+      message: string;
+      /** Fira Id */
+      fira_id: string | null;
+      status: components["schemas"]["FiraDocStatus"] | null;
+    };
+    /** UploadResultOut */
+    UploadResultOut: {
+      result: components["schemas"]["UploadFileOut"];
+      summary: components["schemas"]["FiraSummaryOut"];
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -615,6 +947,153 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["CaptureOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  post_chat_chat_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChatIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChatOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  post_fira_upload_fira_upload_post: {
+    parameters: {
+      query: {
+        /** @description name.pdf */
+        file_name: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UploadResultOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_firas_fira_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FiraListOut"];
+        };
+      };
+    };
+  };
+  report_data_report_data_get: {
+    parameters: {
+      query?: {
+        period?: components["schemas"]["DashboardPeriod"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportData"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  report_pdf_report_pdf_get: {
+    parameters: {
+      query?: {
+        period?: components["schemas"]["DashboardPeriod"];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The CA report PDF. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": unknown;
         };
       };
       /** @description Validation Error */

@@ -9,6 +9,7 @@ from collections.abc import Callable
 
 from fastapi import Request
 
+from app.common.constants import RATE_LIMIT_PRUNE_ABOVE
 from app.common.errors import RateLimitedError
 
 RATE_LIMITED_MESSAGE = "Too many requests. Please wait a moment and try again."
@@ -30,6 +31,8 @@ class FixedWindowLimiter:
         """Record one hit. Return None if allowed, else seconds until the window resets."""
         now = self._clock()
         with self._lock:
+            if len(self._windows) > RATE_LIMIT_PRUNE_ABOVE:
+                self._prune(now)
             started, count = self._windows.get(key, (now, 0))
             if now - started >= self._window_s:
                 started, count = now, 0
@@ -38,16 +41,25 @@ class FixedWindowLimiter:
             self._windows[key] = (started, count + 1)
             return None
 
+    def _prune(self, now: float) -> None:
+        """Forget finished windows so many different keys cannot grow memory without limit."""
+        expired = [
+            k for k, (started, _) in self._windows.items() if now - started >= self._window_s
+        ]
+        for key in expired:
+            del self._windows[key]
+
     def reset(self) -> None:
         with self._lock:
             self._windows.clear()
 
 
 def client_ip(request: Request, trust_proxy_headers: bool) -> str:
-    """Client IP: first X-Forwarded-For entry only when the proxy is trusted."""
+    """Client IP. Behind a trusted proxy (Render) use the LAST X-Forwarded-For entry: the proxy
+    appends the address it saw, while earlier entries are whatever the client sent (spoofable)."""
     forwarded = request.headers.get("x-forwarded-for", "")
     if trust_proxy_headers and forwarded:
-        return forwarded.split(",")[0].strip()
+        return forwarded.split(",")[-1].strip()
     return request.client.host if request.client else "unknown"
 
 

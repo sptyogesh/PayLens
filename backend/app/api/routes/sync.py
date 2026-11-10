@@ -12,9 +12,9 @@ from app.common.dates import utc_now
 from app.common.types import SyncTrigger
 from app.db import get_engine, get_session, get_session_factory
 from app.fx import FxGateway
-from app.paypal.gateway import PayPalGateway
+from app.paypal import PayPalGateway
 from app.schemas.sync import SyncRequest, SyncRunOut
-from app.services.leakage_service import safe_recalculate
+from app.services.refresh_service import safe_refresh
 from app.services.sync_service import get_last_run, start_sync
 
 router = APIRouter(tags=["sync"])
@@ -29,8 +29,10 @@ def post_sync(
     body: Annotated[SyncRequest | None, Body()] = None,
 ) -> SyncRunOut:
     period = (body.start, body.end) if body else (None, None)
-    run = start_sync(factory, engine, gateway, SyncTrigger.MANUAL, period)
-    safe_recalculate(factory, fx)  # FR-020: leakage is ready when Sync now returns
+    try:
+        run = start_sync(factory, engine, gateway, SyncTrigger.MANUAL, period)
+    finally:  # FR-020: leakage is ready when Sync now returns, even after a failed sync
+        safe_refresh(factory, fx)
     return SyncRunOut.from_model(run, utc_now())
 
 

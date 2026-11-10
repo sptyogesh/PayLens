@@ -6,7 +6,12 @@ from typing import Literal
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.common.constants import FX_API_DEFAULT_URL, PAYPAL_SANDBOX_BASE_URL
+from app.common.constants import (
+    FX_API_DEFAULT_URL,
+    LLM_DEFAULT_API_URL,
+    LLM_DEFAULT_MODEL,
+    PAYPAL_SANDBOX_BASE_URL,
+)
 
 
 class Settings(BaseSettings):
@@ -24,6 +29,10 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = True
     fx_mode: Literal["http", "fake"] = "http"
     fx_api_url: str = FX_API_DEFAULT_URL
+    llm_mode: Literal["http", "fake"] = "http"
+    llm_api_key: str = ""
+    llm_model: str = LLM_DEFAULT_MODEL
+    llm_api_url: str = LLM_DEFAULT_API_URL
 
     @model_validator(mode="after")
     def check_safety_rules(self) -> "Settings":
@@ -37,6 +46,10 @@ class Settings(BaseSettings):
             raise ValueError("PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are required")
         if self.fx_mode == "fake" and self.app_env != "test":
             raise ValueError("FX_MODE=fake is only allowed when APP_ENV=test")
+        if self.llm_mode == "fake" and self.app_env != "test":
+            raise ValueError("LLM_MODE=fake is only allowed when APP_ENV=test")
+        if self.llm_mode == "http" and not self.llm_api_key:
+            raise ValueError("LLM_API_KEY is required (or LLM_MODE=fake with APP_ENV=test)")
         return self
 
     @property

@@ -5,7 +5,9 @@
 import type { z } from "zod";
 
 import type { components } from "./api-types";
+import type { ChatOutSchema } from "./chat-schemas";
 import type { DashboardSchema } from "./dashboard-schemas";
+import type { FiraListSchema, FiraUploadOutSchema } from "./fira-schemas";
 import type {
   CaptureOutSchema,
   LastSyncSchema,
@@ -24,4 +26,7 @@ export const contractChecks: [
   Same<z.infer<typeof PayOrderOutSchema>, Api["PayOrderOut"]>,
   Same<z.infer<typeof CaptureOutSchema>, Api["CaptureOut"]>,
   Same<z.infer<typeof DashboardSchema>, Api["DashboardOut"]>,
-] = [true, true, true, true, true, true];
+  Same<z.infer<typeof ChatOutSchema>, Api["ChatOut"]>,
+  Same<z.infer<typeof FiraListSchema>, Api["FiraListOut"]>,
+  Same<z.infer<typeof FiraUploadOutSchema>, Api["UploadResultOut"]>,
+] = [true, true, true, true, true, true, true, true, true];

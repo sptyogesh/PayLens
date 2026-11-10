@@ -48,4 +48,25 @@ describe("TransactionsView", () => {
     render(<TransactionsView />);
     expect(await screen.findByText(/Sync finished \(on startup\)/)).toBeInTheDocument();
   });
+
+  it("asks for the largest page and says when only part of the list is shown", async () => {
+    const limits: (string | null)[] = [];
+    server.use(
+      http.get(`${API}/transactions`, ({ request }) => {
+        limits.push(new URL(request.url).searchParams.get("limit"));
+        return HttpResponse.json({ ...transactionList([transaction()]), total: 250 });
+      }),
+    );
+    render(<TransactionsView />);
+    expect(
+      await screen.findByText("Showing 1 of 250 transactions (newest first)"),
+    ).toBeInTheDocument();
+    expect(limits).toEqual(["200"]);
+  });
+
+  it("shows no partial-list note when every transaction is shown", async () => {
+    render(<TransactionsView />);
+    expect(await screen.findByText("PayPal sandbox")).toBeInTheDocument();
+    expect(screen.queryByText(/^Showing \d+ of/)).not.toBeInTheDocument();
+  });
 });

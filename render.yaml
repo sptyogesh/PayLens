@@ -1,0 +1,73 @@
+# Render Blueprint for PayLens (Phase 1A). Not deployed yet: the owner deploys after manual testing.
+# Field reference: https://render.com/docs/blueprint-spec (checked 2026-11-10, specs/002 research R8).
+# Secrets use `sync: false`: Render asks for them once when the Blueprint is created; never commit them.
+databases:
+  - name: paylens-db
+    databaseName: paylens
+    user: paylens
+    plan: free
+    postgresMajorVersion: "18"
+
+services:
+  - type: web
+    name: paylens-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: uv sync --frozen --no-dev
+    startCommand: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: paylens-db
+          property: connectionString
+      - key: PAYPAL_MODE
+        value: http
+      - key: PAYPAL_BASE_URL
+        value: https://api-m.sandbox.paypal.com
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL  # the paylens-web URL, e.g. https://paylens-web.onrender.com
+        sync: false
+      - key: TRUST_PROXY_HEADERS
+        value: "true"
+      - key: STARTUP_SYNC_ENABLED
+        value: "true"
+      - key: FX_MODE
+        value: http
+      - key: FX_API_URL
+        value: https://api.frankfurter.dev
+      - key: LLM_MODE
+        value: http
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: claude-opus-5-5
+      - key: LLM_API_URL
+        value: https://api.anthropic.com
+
+  - type: web
+    name: paylens-web
+    runtime: node
+    rootDir: frontend
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NEXT_PUBLIC_API_URL  # the paylens-api URL, e.g. https://paylens-api.onrender.com
+        sync: false
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID  # sandbox client ID (public by design)
+        sync: false
+      - key: NEXT_PUBLIC_PAYPAL_MODE
+        value: http

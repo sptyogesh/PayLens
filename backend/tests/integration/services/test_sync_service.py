@@ -49,6 +49,7 @@ def test_invalid_period_is_rejected(
     session_factory: sessionmaker[Session], db_engine: Engine, period: tuple[datetime | None, ...]
 ) -> None:
     with pytest.raises(InvalidPeriodError):
+        # Ignore on the next line: the period is deliberately invalid to test the 400 path
         start_sync(session_factory, db_engine, FakePayPalGateway(), SyncTrigger.MANUAL, period)  # type: ignore[arg-type]
 
 
@@ -88,3 +89,24 @@ def test_stale_running_row_is_reported_as_failed() -> None:
     assert out.outcome is SyncOutcome.FAILED
     assert out.error is not None and out.error.code == "SYNC_INTERRUPTED"
     assert SyncRunOut.from_model(run, started + timedelta(minutes=5)).outcome is SyncOutcome.RUNNING
+
+
+def test_unexpected_error_records_the_real_partial_result(
+    session_factory: sessionmaker[Session], db_engine: Engine, db_session: Session
+) -> None:
+    class BrokenLaterGateway(FakePayPalGateway):
+        calls = 0
+
+        def search_transactions(self, start: datetime, end: datetime, page: int) -> SearchPage:
+            if page == 1:
+                self.calls += 1
+            if self.calls > 1:
+                raise RuntimeError("bug in window 2")
+            return super().search_transactions(start, end, page)
+
+    with pytest.raises(RuntimeError):
+        start_sync(session_factory, db_engine, BrokenLaterGateway(), SyncTrigger.MANUAL)
+    last = get_last_run(db_session)
+    assert last is not None
+    assert (last.outcome, last.error_code) == (SyncOutcome.PARTIAL, "INTERNAL_ERROR")
+    assert (last.windows_total, last.windows_done) == (3, 1)

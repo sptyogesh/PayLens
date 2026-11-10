@@ -19,7 +19,7 @@ def test_round_money_is_half_up(value: str, expected: str) -> None:
 
 def test_parse_money_rejects_float_nan_and_text() -> None:
     with pytest.raises(TypeError):
-        parse_money(1.5)  # type: ignore[arg-type]
+        parse_money(1.5)  # type: ignore[arg-type]  # deliberately wrong type for the test
     for bad in ["NaN", "Infinity", "abc", ""]:
         with pytest.raises(ValueError, match="amount"):
             parse_money(bad)

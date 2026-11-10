@@ -362,3 +362,16 @@ behaviour need real PostgreSQL. SQLite would hide real bugs.
 - Node: `engines.node` matches the current Next.js LTS-supported range. `.nvmrc` pins the LTS
   major used in CI and on Render.
 - Exact package versions are pinned in `uv.lock` and `package-lock.json` (Principle XVII).
+
+## Hardening check — real sandbox (2026-11-10, Phase 1A hardening step 2)
+
+- Fresh OAuth token (not the cached one): HTTP 200, 30 scopes, **reporting scope present** (it was
+  missing in the earlier checks; enabling "Transaction search" on the app took effect).
+- Transaction Search, last 90 days in three 30-day windows: 1 row in total — event `T1900`
+  (balance adjustment), USD 5000.00, fee 0.00, no payer email. Classified `other` (stored, excluded
+  from income and leakage) — correct per R2. No client payments exist yet in this sandbox account.
+- `/pay` order create (Orders v2, not captured): OK.
+- **Still unverified against real data** (needs sandbox payments from personal accounts through `/pay`
+  and up to 3 h Transaction Search delay): R1 capture ID == Transaction Search ID, R2 "Send money"
+  event code, R3 fee sign, R4 page indexing with more than one page. Owner action: make 8–12 sandbox
+  payments on `/pay`, wait, then press Sync now (quickstart V5–V8).

@@ -36,6 +36,13 @@ export function formatDate(iso: string): string {
   }).format(new Date(iso));
 }
 
+/** "2026-10-05" → "5 Oct 2026" (a calendar date, so no time zone shift). */
+export function formatDay(isoDate: string): string {
+  return new Intl.DateTimeFormat(DISPLAY_LOCALE, { timeZone: "UTC", dateStyle: "medium" }).format(
+    new Date(`${isoDate}T00:00:00Z`),
+  );
+}
+
 const CENTS_PATTERN = /^(-?)(\d+)\.(\d{2})$/;
 
 /** Exact comparison of 2-decimal money strings (for sorting), via integer cents. */

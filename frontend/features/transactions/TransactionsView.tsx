@@ -27,7 +27,17 @@ export function TransactionsView() {
           <ErrorState message={transactions.error.message} onRetry={transactions.reload} />
         ) : null}
         {transactions.status === "success" ? (
-          <TransactionsGrid rows={transactions.data.items} />
+          <div className="space-y-2">
+            {transactions.data.total > transactions.data.items.length ? (
+              <p className="text-sm text-slate-700">
+                {TRANSACTIONS_TEXT.partialList(
+                  transactions.data.items.length,
+                  transactions.data.total,
+                )}
+              </p>
+            ) : null}
+            <TransactionsGrid rows={transactions.data.items} />
+          </div>
         ) : null}
       </div>
     </>

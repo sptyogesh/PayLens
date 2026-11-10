@@ -318,6 +318,195 @@
           }
         }
       }
+    },
+    "/chat": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Post Chat",
+        "operationId": "post_chat_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fira/upload": {
+      "post": {
+        "tags": [
+          "fira"
+        ],
+        "summary": "Post Fira Upload",
+        "operationId": "post_fira_upload_fira_upload_post",
+        "parameters": [
+          {
+            "name": "file_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "\\S",
+              "description": "name.pdf",
+              "title": "File Name"
+            },
+            "description": "name.pdf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResultOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fira": {
+      "get": {
+        "tags": [
+          "fira"
+        ],
+        "summary": "Get Firas",
+        "operationId": "get_firas_fira_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiraListOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report/data": {
+      "get": {
+        "tags": [
+          "report"
+        ],
+        "summary": "Report Data",
+        "operationId": "report_data_report_data_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DashboardPeriod",
+              "default": "last_3_months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportData"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report.pdf": {
+      "get": {
+        "tags": [
+          "report"
+        ],
+        "summary": "Report Pdf",
+        "operationId": "report_pdf_report_pdf_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DashboardPeriod",
+              "default": "last_3_months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The CA report PDF.",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -379,6 +568,111 @@
           "recorded"
         ],
         "title": "CaptureOut"
+      },
+      "ChatIn": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "ChatIn"
+      },
+      "ChatOut": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "answered",
+              "no_data",
+              "fallback"
+            ],
+            "title": "Outcome"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Periods"
+          },
+          "figures": {
+            "items": {
+              "$ref": "#/components/schemas/FigureOut"
+            },
+            "type": "array",
+            "title": "Figures"
+          },
+          "disclaimer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disclaimer"
+          },
+          "tools_used": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tools Used"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "outcome",
+          "periods",
+          "figures",
+          "disclaimer",
+          "tools_used"
+        ],
+        "title": "ChatOut"
+      },
+      "ChatTurn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatTurn"
       },
       "ClientRef": {
         "properties": {
@@ -560,6 +854,341 @@
         ],
         "title": "DashboardPeriodOut"
       },
+      "FigureOut": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "money",
+              "count",
+              "percent"
+            ],
+            "title": "Kind"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "kind",
+          "value",
+          "currency",
+          "period"
+        ],
+        "title": "FigureOut",
+        "description": "A figure behind the answer, copied from a tool result by code (FR-005)."
+      },
+      "FiraDocStatus": {
+        "type": "string",
+        "enum": [
+          "matched",
+          "needs_review",
+          "no_match"
+        ],
+        "title": "FiraDocStatus"
+      },
+      "FiraItemOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FiraDocStatus"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "foreign_amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inr_amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "remittance_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remittance Date"
+          },
+          "reference_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference No"
+          },
+          "remitter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remitter"
+          },
+          "purpose_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purpose Code"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          },
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/FiraMatchOut"
+            },
+            "type": "array",
+            "title": "Matches"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "file_name",
+          "status",
+          "score",
+          "reason",
+          "foreign_amount",
+          "inr_amount",
+          "rate",
+          "remittance_date",
+          "reference_no",
+          "remitter",
+          "purpose_code",
+          "uploaded_at",
+          "matches"
+        ],
+        "title": "FiraItemOut"
+      },
+      "FiraListOut": {
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/FiraSummaryOut"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FiraItemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "missing": {
+            "items": {
+              "$ref": "#/components/schemas/FiraPaymentOut"
+            },
+            "type": "array",
+            "title": "Missing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "items",
+          "missing"
+        ],
+        "title": "FiraListOut"
+      },
+      "FiraMatchKind": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "weekly"
+        ],
+        "title": "FiraMatchKind"
+      },
+      "FiraMatchOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Transaction Id"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FiraMatchKind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "paypal_transaction_id",
+          "score",
+          "kind"
+        ],
+        "title": "FiraMatchOut"
+      },
+      "FiraPaymentOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Transaction Id"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "client": {
+            "type": "string",
+            "title": "Client"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "paypal_transaction_id",
+          "date",
+          "client",
+          "gross"
+        ],
+        "title": "FiraPaymentOut",
+        "description": "An eligible payment (used for the \"missing FIRA\" list)."
+      },
+      "FiraStatus": {
+        "type": "string",
+        "enum": [
+          "matched",
+          "needs_review",
+          "missing"
+        ],
+        "title": "FiraStatus"
+      },
+      "FiraSummaryOut": {
+        "properties": {
+          "matched": {
+            "type": "integer",
+            "title": "Matched"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "no_match": {
+            "type": "integer",
+            "title": "No Match"
+          },
+          "missing_payments": {
+            "type": "integer",
+            "title": "Missing Payments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "matched",
+          "needs_review",
+          "no_match",
+          "missing_payments"
+        ],
+        "title": "FiraSummaryOut"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -721,6 +1350,182 @@
           "end"
         ],
         "title": "PeriodOut"
+      },
+      "ReportData": {
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/DashboardPeriodOut"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TotalsOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gross_by_currency": {
+            "items": {
+              "$ref": "#/components/schemas/MoneyOut"
+            },
+            "type": "array",
+            "title": "Gross By Currency"
+          },
+          "by_month": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Month"
+          },
+          "by_client": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Client"
+          },
+          "excluded_count": {
+            "type": "integer",
+            "title": "Excluded Count"
+          },
+          "not_calculated_count": {
+            "type": "integer",
+            "title": "Not Calculated Count"
+          },
+          "simulated_spread_percent": {
+            "type": "string",
+            "title": "Simulated Spread Percent"
+          },
+          "fira": {
+            "$ref": "#/components/schemas/ReportFira"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ReportSummary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "generated_at",
+          "totals",
+          "gross_by_currency",
+          "by_month",
+          "by_client",
+          "excluded_count",
+          "not_calculated_count",
+          "simulated_spread_percent",
+          "fira",
+          "notes",
+          "disclaimer",
+          "summary"
+        ],
+        "title": "ReportData"
+      },
+      "ReportFira": {
+        "properties": {
+          "uploaded": {
+            "type": "integer",
+            "title": "Uploaded"
+          },
+          "matched": {
+            "type": "integer",
+            "title": "Matched"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "missing": {
+            "type": "integer",
+            "title": "Missing"
+          },
+          "missing_payments": {
+            "items": {
+              "$ref": "#/components/schemas/ReportMissingPayment"
+            },
+            "type": "array",
+            "title": "Missing Payments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "uploaded",
+          "matched",
+          "needs_review",
+          "missing",
+          "missing_payments"
+        ],
+        "title": "ReportFira",
+        "description": "FIRA status of the eligible payments in the period; `uploaded` counts every FIRA stored."
+      },
+      "ReportMissingPayment": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "client": {
+            "type": "string",
+            "title": "Client"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "client",
+          "paypal_transaction_id",
+          "gross"
+        ],
+        "title": "ReportMissingPayment"
+      },
+      "ReportSummary": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "code"
+            ],
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "source"
+        ],
+        "title": "ReportSummary"
       },
       "SyncErrorOut": {
         "properties": {
@@ -1011,6 +1816,16 @@
                 "type": "null"
               }
             ]
+          },
+          "fira_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FiraStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -1027,7 +1842,8 @@
           "source",
           "is_flagged",
           "leakage_status",
-          "leakage"
+          "leakage",
+          "fira_status"
         ],
         "title": "TransactionOut"
       },
@@ -1048,6 +1864,76 @@
           "reversed"
         ],
         "title": "TransactionStatus"
+      },
+      "UploadFileOut": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "stored",
+              "duplicate",
+              "rejected",
+              "failed"
+            ],
+            "title": "Outcome"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "fira_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fira Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FiraDocStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_name",
+          "outcome",
+          "message",
+          "fira_id",
+          "status"
+        ],
+        "title": "UploadFileOut",
+        "description": "What happened to one uploaded file. `status` is set only when it was stored."
+      },
+      "UploadResultOut": {
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/UploadFileOut"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/FiraSummaryOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result",
+          "summary"
+        ],
+        "title": "UploadResultOut"
       },
       "ValidationError": {
         "properties": {

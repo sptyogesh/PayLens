@@ -9,7 +9,7 @@ from app.api.deps import get_fx_gateway, get_gateway, rate_limit
 from app.common.constants import RATE_LIMIT_PAY
 from app.db import get_session_factory
 from app.fx import FxGateway
-from app.paypal.gateway import PayPalGateway
+from app.paypal import PayPalGateway
 from app.schemas.pay import CaptureOut, OrderId, PayOrderIn, PayOrderOut
 from app.services.checkout_service import capture_and_record, create_order
 

@@ -61,3 +61,24 @@ def test_rate_limit_can_be_switched_off_for_e2e(
     monkeypatch.setenv("RATE_LIMIT_ENABLED", "false")
     get_settings.cache_clear()
     assert [api.post("/sync").status_code for _ in range(4)] == [200] * 4
+
+
+def test_sync_start_older_than_three_years_is_400(api: TestClient) -> None:
+    response = api.post("/sync", json={"start": "2020-01-01T00:00:00Z"})
+    assert (response.status_code, response.json()["error"]["code"]) == (400, "INVALID_PERIOD")
+
+
+def test_failed_sync_still_refreshes_and_keeps_its_error(
+    api: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    refreshed: list[bool] = []
+
+    def boom(*_args: object) -> None:
+        raise RuntimeError("sync bug")
+
+    monkeypatch.setattr("app.api.routes.sync.start_sync", boom)
+    monkeypatch.setattr("app.api.routes.sync.safe_refresh", lambda *_a: refreshed.append(True))
+    client = TestClient(api.app, raise_server_exceptions=False)
+    response = client.post("/sync", json={})
+    assert (response.status_code, response.json()["error"]["code"]) == (500, "INTERNAL_ERROR")
+    assert refreshed == [True]

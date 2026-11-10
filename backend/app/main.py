@@ -38,6 +38,7 @@ def create_app() -> FastAPI:
         allow_origins=allowed_origins(),
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
+        expose_headers=["Content-Disposition"],  # CA report file name (005)
     )
     register_error_handlers(app)
     for router in ROUTERS:

@@ -1,3 +1,4 @@
+import { Disclaimer } from "@/components/ui/Disclaimer";
 import type { Dashboard } from "@/lib/api/dashboard-schemas";
 import { DASHBOARD_TEXT, SOURCE_LABELS } from "@/lib/constants";
 
@@ -20,9 +21,7 @@ export function SummaryNotes({ data }: { data: Dashboard }) {
           {DASHBOARD_TEXT.notCalculated(data.not_calculated_count)}
         </p>
       ) : null}
-      <p role="note" className="rounded-md bg-slate-100 px-3 py-2 text-xs">
-        {DASHBOARD_TEXT.spreadNote(data.simulated_spread_percent)}
-      </p>
+      <Disclaimer text={DASHBOARD_TEXT.spreadNote(data.simulated_spread_percent)} />
     </div>
   );
 }

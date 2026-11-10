@@ -10,6 +10,7 @@ function runBackendScript(...args: string[]): void {
       APP_ENV: "test",
       PAYPAL_MODE: "fake",
       FX_MODE: "fake",
+      LLM_MODE: "fake",
       DATABASE_URL: E2E_DATABASE_URL,
     },
     stdio: "ignore",
@@ -26,9 +27,31 @@ export function seedDemo(): void {
   runBackendScript("scripts.seed_demo");
 }
 
+/** Write the demo FIRA PDFs (research R4: 21 files for SEED-0001…0021) into `outDir`. */
+export function generateFiraSamples(outDir: string): void {
+  runBackendScript("scripts.generate_fira_samples", "--out", outDir);
+}
+
 /** The app's ₹ display format (en-IN), for comparing API amounts with the screen. */
 export function formatInr(amount: string): string {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
     amount as Intl.StringNumericLiteral,
   );
+}
+
+/**
+ * The CA report PDF's INR format: "INR 1,23,456.78" (en-IN grouping, two decimals; the built-in
+ * PDF fonts have no ₹ glyph).
+ */
+export function formatReportInr(amount: string): string {
+  const grouped = new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount as Intl.StringNumericLiteral);
+  return `INR ${grouped}`;
+}
+
+/** Undo PDF string escaping of "(" and ")" so report text can be searched as written. */
+export function pdfText(raw: string): string {
+  return raw.replaceAll("\\(", "(").replaceAll("\\)", ")");
 }

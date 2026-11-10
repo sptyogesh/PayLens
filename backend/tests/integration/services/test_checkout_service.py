@@ -68,5 +68,6 @@ def test_db_failure_still_confirms_with_recorded_false() -> None:
 
     gateway = FakePayPalGateway()
     order_id = create_order(gateway, order())
+    # Ignore on the next line: a context-manager factory that fails stands in for a sessionmaker
     out = capture_and_record(gateway, broken_factory, order_id, FakeFxGateway())  # type: ignore[arg-type]
     assert (out.recorded, out.status) == (False, "completed")
