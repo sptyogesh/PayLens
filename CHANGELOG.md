@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend foundation: typed settings with sandbox-only guard, money/date/error/HTTP-retry/rate-limit helpers, `clients` and `transactions` tables, `GET /health` (specs/001-paypal-sync)
 - Frontend foundation: shared UI components (Button, Card, Badge, MoneyText, DataGrid, Spinner, EmptyState, ErrorState, Disclaimer), app shell with demo-mode banner, typed API client with zod validation (specs/001-paypal-sync)
 
+### Fixed
+
+- API times are always UTC with `Z`; sync period and start time were returned in the database server's local time zone (specs/001-paypal-sync)
+- Backend tests no longer read `backend/.env`, so local PayPal credentials never reach a test run
+
 ### Changed
 
 - `.gitignore`: anchor Python `lib/` rules to the repo root so `frontend/lib/` is tracked; add Node/Next.js patterns

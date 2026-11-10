@@ -8,6 +8,7 @@ from pydantic import AwareDatetime, BaseModel
 from app.common.constants import SYNC_STALE_AFTER_MINUTES
 from app.common.types import SyncOutcome, SyncTrigger
 from app.models import SyncRun
+from app.schemas.common import UtcDatetime
 
 NO_NEW_DATA_HINT = (
     "No new payments found. New sandbox payments can take up to 3 hours to appear in PayPal."
@@ -21,8 +22,8 @@ class SyncRequest(BaseModel):
 
 
 class PeriodOut(BaseModel):
-    start: datetime
-    end: datetime
+    start: UtcDatetime
+    end: UtcDatetime
 
 
 class WindowsOut(BaseModel):
@@ -46,8 +47,8 @@ class SyncRunOut(BaseModel):
     id: uuid.UUID
     trigger: SyncTrigger
     period: PeriodOut
-    started_at: datetime
-    finished_at: datetime | None
+    started_at: UtcDatetime
+    finished_at: UtcDatetime | None
     outcome: SyncOutcome
     windows: WindowsOut
     counts: CountsOut
