@@ -60,3 +60,14 @@ LOCAL_FRONTEND_ORIGIN: Final = "http://localhost:3000"
 
 # --- Clients ---
 UNKNOWN_CLIENT_NAME: Final = "Unknown client"
+
+# --- Demo seed (FR-040): synthetic fees, labelled "Demo seed" in the UI ---
+SEED_FEE_PERCENT: Final = Decimal("0.044")
+SEED_FEE_FIXED: Final = {
+    "USD": Decimal("0.30"),
+    "GBP": Decimal("0.20"),
+    "EUR": Decimal("0.35"),
+    "AUD": Decimal("0.30"),
+}
+SEED_ID_PREFIX: Final = "SEED-"
+SEED_MONTHS: Final = 4

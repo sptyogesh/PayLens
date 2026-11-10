@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { API_URL, resetDatabase } from "./support/db";
+import { API_URL, resetDatabase, seedDemo } from "./support/db";
 
 test.beforeEach(() => {
   resetDatabase();
@@ -42,4 +42,17 @@ test("E11 no horizontal page scroll", async ({ page }) => {
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
   expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("FR-050 seeded and synced rows show their own source badges side by side", async ({
+  page,
+}) => {
+  seedDemo();
+  await page.goto("/transactions");
+  const grid = page.getByRole("region", { name: "Transactions" });
+  await expect(grid.getByText("Demo seed")).toHaveCount(24);
+  await page.getByRole("button", { name: "Sync now" }).click();
+  await expect(page.getByText(/Added 10/)).toBeVisible();
+  await expect(grid.getByText("PayPal sandbox")).toHaveCount(10);
+  await expect(grid.getByText("Demo seed")).toHaveCount(24);
 });
