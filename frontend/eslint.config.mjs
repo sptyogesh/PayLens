@@ -9,6 +9,7 @@ const FILE_MAX_LINES = 200;
 const COMPONENT_MAX_LINES = 150;
 const TEST_MAX_LINES = 300;
 const FUNCTION_MAX_LINES = 40;
+const MAX_PARAMS = 5;
 const maxLines = (max) => ["error", { max }];
 
 export default defineConfig([
@@ -26,6 +27,7 @@ export default defineConfig([
       "import-x/no-cycle": "error",
       "max-lines": maxLines(FILE_MAX_LINES),
       "max-lines-per-function": ["error", { max: FUNCTION_MAX_LINES, IIFEs: true }],
+      "max-params": ["error", MAX_PARAMS],
     },
   },
   { files: ["**/*.tsx"], rules: { "max-lines": maxLines(COMPONENT_MAX_LINES) } },

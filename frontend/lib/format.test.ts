@@ -3,6 +3,7 @@ import {
   compareAmounts,
   compareOptionalAmounts,
   formatDate,
+  formatDay,
   formatINR,
   formatMoney,
   formatPercent,
@@ -49,6 +50,13 @@ describe("amount sign helpers", () => {
 describe("formatDate", () => {
   it("shows UTC times in IST", () => {
     expect(formatDate("2026-11-10T06:30:00Z")).toContain("12:00");
+  });
+});
+
+describe("formatDay", () => {
+  it("shows a calendar date without a time zone shift", () => {
+    expect(formatDay("2026-10-05")).toBe("5 Oct 2026");
+    expect(formatDay("2026-12-31")).toBe("31 Dec 2026");
   });
 });
 

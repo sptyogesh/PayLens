@@ -10,6 +10,7 @@ dependencies = [
     "psycopg[binary]>=3",
     "pydantic>=2",
     "pydantic-settings>=2.16.2",
+    "reportlab>=5.1.0",
     "sqlalchemy>=2",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -46,6 +47,10 @@ python_version = "3.12"
 plugins = ["pydantic.mypy"]
 mypy_path = "."
 explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["reportlab", "reportlab.*"]  # ReportLab ships no type hints; no stubs package exists
+ignore_missing_imports = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

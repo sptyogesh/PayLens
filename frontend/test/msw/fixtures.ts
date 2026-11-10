@@ -1,3 +1,4 @@
+import type { ChatOut } from "@/lib/api/chat-schemas";
 import type { BreakdownRow, Dashboard, Totals } from "@/lib/api/dashboard-schemas";
 import type { CaptureOut, Leakage, SyncRun, Transaction, TransactionList } from "@/lib/api/schemas";
 
@@ -50,6 +51,7 @@ export function transaction(overrides: Partial<Transaction> = {}): Transaction {
     is_flagged: false,
     leakage_status: "calculated",
     leakage: leakage(),
+    fira_status: null,
     ...overrides,
   };
 }
@@ -104,3 +106,23 @@ export function dashboard(overrides: Partial<Dashboard> = {}): Dashboard {
     ...overrides,
   };
 }
+
+const LAST_QUARTER = "Last quarter (1 Jul 2026 – 30 Sep 2026)";
+
+export function chatAnswer(overrides: Partial<ChatOut> = {}): ChatOut {
+  return {
+    answer: "Your FX loss in last quarter was ₹38,000.00 (INR, Simulated (sandbox) rate).",
+    outcome: "answered",
+    periods: [LAST_QUARTER],
+    figures: [
+      { label: "FX loss", kind: "money", value: "38000.00", currency: "INR", period: LAST_QUARTER },
+      { label: "Payments", kind: "count", value: "18", currency: null, period: LAST_QUARTER },
+      { label: "Leakage %", kind: "percent", value: "7.30", currency: null, period: LAST_QUARTER },
+    ],
+    disclaimer: null,
+    tools_used: ["fee_summary"],
+    ...overrides,
+  };
+}
+
+export * from "./fira-fixtures";

@@ -11,6 +11,8 @@ def main() -> None:
     # The schema does not depend on real settings; use safe test values to build the app.
     os.environ.setdefault("APP_ENV", "test")
     os.environ.setdefault("PAYPAL_MODE", "fake")
+    os.environ.setdefault("FX_MODE", "fake")
+    os.environ.setdefault("LLM_MODE", "fake")
     os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://localhost/unused")
     from app.main import create_app  # noqa: PLC0415 - import after env is set
 

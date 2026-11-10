@@ -16,4 +16,4 @@ def test_money_out_is_a_two_place_string() -> None:
 def test_money_out_rejects_numbers_and_bad_strings() -> None:
     for bad in [12.5, "12.5", "abc"]:
         with pytest.raises(ValidationError):
-            MoneyOut(amount=bad, currency="USD")  # type: ignore[arg-type]
+            MoneyOut(amount=bad, currency="USD")  # type: ignore[arg-type]  # deliberately wrong type

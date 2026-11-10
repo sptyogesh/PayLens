@@ -1,8 +1,13 @@
 """Decimal money helpers. Rounding happens only here, at the end (Principle III)."""
 
+import re
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from typing import Final
 
-from app.common.constants import MONEY_PLACES, PERCENT_PLACES, RATE_PLACES
+from app.common.constants import INR, MONEY_PLACES, PERCENT_PLACES, RATE_PLACES
+
+INDIAN_GROUPS: Final = re.compile(r"(\d)(?=(\d\d)*\d{3}$)")  # 1,23,45,678
+WESTERN_GROUPS: Final = re.compile(r"(\d)(?=(\d{3})+$)")  # 12,345,678
 
 
 def parse_money(value: str) -> Decimal:
@@ -46,3 +51,18 @@ def to_rate_string(rate: Decimal) -> str:
 def to_percent_string(value: Decimal) -> str:
     """Format a percentage for JSON: a string with exactly 2 decimal places."""
     return format(round_percent(value), "f")
+
+
+def group_digits(amount: str, currency: str) -> str:
+    """Insert thousands commas into an API money string, no arithmetic: en-IN grouping for INR
+    ("123456.78" -> "1,23,456.78"), groups of three otherwise ("7080.00" -> "7,080.00")."""
+    sign = "-" if amount.startswith("-") else ""
+    whole, dot, fraction = amount.removeprefix("-").partition(".")
+    pattern = INDIAN_GROUPS if currency == INR else WESTERN_GROUPS
+    grouped = pattern.sub(r"\1,", whole)
+    return f"{sign}{grouped}{dot}{fraction}"
+
+
+def display_money(amount: str, currency: str) -> str:
+    """ "INR 1,23,456.78" / "USD 7,080.00": the currency code, then the grouped API string."""
+    return f"{currency} {group_digits(amount, currency)}"

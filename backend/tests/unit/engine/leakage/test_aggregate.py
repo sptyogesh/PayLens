@@ -2,16 +2,20 @@
 
 from decimal import Decimal
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
+from app.common.types import Money
 from app.engine.leakage import (
     LeakageInput,
     LeakageResult,
     LeakageRow,
     by_client,
+    by_currency,
     by_month,
     calculate_leakage,
+    gross_by_currency,
     simulated_paypal_rate,
     totals,
 )
@@ -104,3 +108,31 @@ def test_fx_gain_totals_stay_negative_and_cards_add_up() -> None:
 def test_cards_always_add_up(values: list[tuple[int, str]]) -> None:
     overall = totals([row(str(D(c) / 100), cur) for c, cur in values])
     assert overall.fee_loss_inr + overall.fx_loss_inr == overall.total_leakage_inr
+
+
+# --- 003: by currency (income_summary tool) ---
+
+
+def with_gross(r: LeakageRow, gross: str, currency: str) -> LeakageRow:
+    return r.model_copy(update={"gross": Money(amount=D(gross), currency=currency)})
+
+
+def test_gross_is_summed_per_currency_never_mixed() -> None:
+    rows = [
+        with_gross(row("100.00"), "100.00", "USD"),
+        with_gross(row("50.00", "GBP"), "50.00", "GBP"),
+        with_gross(row("25.50"), "25.50", "USD"),
+    ]
+    assert gross_by_currency(rows) == [
+        Money(amount=D("50.00"), currency="GBP"),
+        Money(amount=D("125.50"), currency="USD"),
+    ]
+    groups = by_currency(rows)
+    assert [(g.key, g.totals.payment_count) for g in groups] == [("GBP", 1), ("USD", 2)]
+    assert sum(g.totals.income_inr for g in groups) == totals(rows).income_inr
+
+
+def test_by_currency_needs_the_gross_amount() -> None:
+    assert gross_by_currency([]) == []
+    with pytest.raises(ValueError, match="gross"):
+        by_currency([row("10.00")])

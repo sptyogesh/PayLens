@@ -12,4 +12,9 @@ describe("Disclaimer (U11)", () => {
       expect(screen.getByRole("note")).toHaveTextContent(DISCLAIMERS[kind]);
     },
   );
+
+  it("shows explicit text when no kind is given", () => {
+    render(<Disclaimer text="Rates are simulated." />);
+    expect(screen.getByRole("note")).toHaveTextContent("Rates are simulated.");
+  });
 });

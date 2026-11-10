@@ -496,13 +496,13 @@ Phase 1 (Setup) and Phase 2 (Foundational).
   - the Transaction Search 3 h delay
   - the seed command
   - MIT license
-- [ ] T069 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Label check across the UI: a `source` badge on every row, the demo banner on every page, the sandbox notice on `/pay`, no PayPal logo as branding (FR-035, FR-050). Fix any gaps and add tests where they are missing.
+- [X] T069 *(done in the Phase 1A hardening review (labels, banner, badges); was carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Label check across the UI: a `source` badge on every row, the demo banner on every page, the sandbox notice on `/pay`, no PayPal logo as branding (FR-035, FR-050). Fix any gaps and add tests where they are missing.
 - [ ] T070 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Run quickstart V2 (hooks) and V3 (fake-mode demo) by hand and note the results in the phase report. The V2 commit attempt needs the owner's approval.
 - [ ] T071 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Owner-assisted sandbox checks V5–V8 from `specs/001-paypal-sync/quickstart.md`. These need the owner's sandbox accounts and can run as soon as payments exist (Transaction Search delay up to 3 h).
   - Record the results in `specs/001-paypal-sync/research.md`: R1 (are the IDs equal?), R2 (the event codes for `/pay` and "Send money"), R3 (the fee sign), R4 (`page=1` is the first page).
   - If a finding contradicts the design, raise it with the owner before changing code.
-- [ ] T072 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Final verification run: `npm run check:all` until green.
-- [ ] T073 *(carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Update `CHANGELOG.md` under `## [Unreleased]`:
+- [X] T072 *(done: Phase 1A final verification, two green runs; was carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Final verification run: `npm run check:all` until green.
+- [X] T073 *(done: CHANGELOG [Unreleased] covers 001–005; was carried forward to 002 polish / Phase 1A final step; T071 and T075 are owner-assisted after the Render deploy)* Update `CHANGELOG.md` under `## [Unreleased]`:
   - `Added`: PayPal sandbox transaction sync (specs/001-paypal-sync)
   - `Added`: sandbox checkout page
   - `Added`: demo seed data

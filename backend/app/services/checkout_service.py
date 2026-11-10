@@ -7,13 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.common.dates import utc_now
 from app.common.types import TransactionStatus
 from app.fx import FxGateway
-from app.paypal.gateway import PayPalGateway
-from app.paypal.mapper import from_capture
-from app.paypal.sync import SessionFactory
-from app.paypal.upsert import upsert_transaction
+from app.paypal import PayPalGateway, SessionFactory, from_capture, upsert_transaction
 from app.schemas.common import MoneyOut
 from app.schemas.pay import CaptureOut, PayOrderIn
-from app.services.leakage_service import safe_recalculate
+from app.services.refresh_service import safe_refresh
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +34,7 @@ def capture_and_record(
         recorded = False
         logger.error("Captured payment could not be recorded: %s", type(error).__name__)
     if recorded:
-        safe_recalculate(factory, fx)  # FR-020
+        safe_refresh(factory, fx)  # FR-020
     return CaptureOut(
         transaction_id=dto.paypal_transaction_id,
         order_id=order_id,

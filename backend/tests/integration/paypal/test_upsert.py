@@ -10,6 +10,7 @@ from app.paypal.mapper import from_search_row
 from app.paypal.schemas import TransactionDetail
 from app.paypal.upsert import upsert_transaction
 from tests.fixtures.paypal.search import row
+from tests.fixtures.rows import add_client, add_tx
 
 
 def dto(data: dict[str, Any]) -> Any:
@@ -69,3 +70,19 @@ def test_missing_email_links_to_single_unknown_client(db_session: Session) -> No
     upsert_transaction(db_session, dto(row("B", email=None)))
     unknown = db_session.scalars(select(Client)).one()
     assert (unknown.is_unknown, unknown.name, unknown.email) == (True, "Unknown client", None)
+
+
+def test_concurrent_insert_of_the_same_id_becomes_an_update(
+    db_session: Session, monkeypatch: Any
+) -> None:
+    """/pay stores the payment while a sync is between its lookup and its insert."""
+
+    def racing_reconcile(session: Session, data: Any) -> tuple[None, None]:
+        other = add_tx(session, add_client(session, "Pay Race"), data.paypal_transaction_id)
+        session.expunge(other)  # as if written by another connection
+        return None, None
+
+    monkeypatch.setattr("app.paypal.upsert.reconcile", racing_reconcile)
+    assert upsert_transaction(db_session, dto(row("RACE"))) == "updated"
+    stored = db_session.scalars(select(Transaction)).one()
+    assert (stored.paypal_transaction_id, stored.gross_amount) == ("RACE", Decimal("100.00"))

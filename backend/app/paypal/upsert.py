@@ -69,11 +69,32 @@ def apply(row: Transaction, dto: TransactionUpsert, client: Client) -> None:
         row.clear_leakage()
 
 
+def find_transaction(session: Session, paypal_transaction_id: str) -> Transaction | None:
+    return session.scalar(
+        select(Transaction).where(Transaction.paypal_transaction_id == paypal_transaction_id)
+    )
+
+
+def insert_transaction(session: Session, dto: TransactionUpsert, client: Client) -> UpsertResult:
+    """Insert in a savepoint. If the same ID was stored concurrently (e.g. by /pay during a sync),
+    only this insert is undone and the stored row is updated instead."""
+    row = Transaction(paypal_transaction_id=dto.paypal_transaction_id, origin=dto.origin)
+    apply(row, dto, client)
+    try:
+        with session.begin_nested():
+            session.add(row)
+    except IntegrityError:
+        existing = find_transaction(session, dto.paypal_transaction_id)
+        if existing is None:  # the conflict was something else; let the caller roll back
+            raise
+        apply(existing, dto, client)
+        return "updated"
+    return "added"
+
+
 def upsert_transaction(session: Session, dto: TransactionUpsert) -> UpsertResult:
     client = upsert_client(session, dto.payer, dto.currency)
-    existing = session.scalar(
-        select(Transaction).where(Transaction.paypal_transaction_id == dto.paypal_transaction_id)
-    )
+    existing = find_transaction(session, dto.paypal_transaction_id)
     if existing is None:
         existing, flag_reason = reconcile(session, dto)
         if existing is not None:
@@ -83,8 +104,4 @@ def upsert_transaction(session: Session, dto: TransactionUpsert) -> UpsertResult
     if existing is not None:
         apply(existing, dto, client)
         return "updated"
-    row = Transaction(paypal_transaction_id=dto.paypal_transaction_id, origin=dto.origin)
-    apply(row, dto, client)
-    session.add(row)
-    session.flush()
-    return "added"
+    return insert_transaction(session, dto, client)

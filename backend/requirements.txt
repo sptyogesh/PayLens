@@ -13,6 +13,8 @@ certifi==2026.10.23
     # via
     #   httpcore
     #   httpx
+charset-normalizer==3.5.2
+    # via reportlab
 click==8.5.1
     # via uvicorn
 fastapi==0.162.2
@@ -33,6 +35,8 @@ idna==3.20
     #   httpx
 opentelemetry-api==1.45.2
     # via fastapi
+pillow==13.0.0
+    # via reportlab
 psycopg==3.3.8
     # via paylens-backend
 psycopg-binary==3.3.8 ; implementation_name != 'pypy'
@@ -52,6 +56,8 @@ python-dotenv==1.2.4
     #   uvicorn
 pyyaml==6.0.3
     # via uvicorn
+reportlab==5.1.0
+    # via paylens-backend
 sqlalchemy==2.1.8
     # via paylens-backend
 starlette==1.10.0

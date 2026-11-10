@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { server } from "@/test/msw/server";
 
-import { ApiError, apiGet, apiPost } from "./client";
+import { ApiError, apiGet, apiPost, apiPostBytes } from "./client";
 import { MoneySchema } from "./schemas";
 
 const API = "http://api.test";
@@ -65,5 +65,31 @@ describe("api client", () => {
     server.use(http.get(`${API}/price`, () => HttpResponse.error()));
     const error = await caught(apiGet("/price", PriceSchema));
     expect(error.code).toBe("NETWORK_ERROR");
+  });
+
+  it("aborts a POST that takes longer than its timeout", async () => {
+    server.use(
+      http.post(`${API}/slow`, async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return HttpResponse.json({ total: "1.00" });
+      }),
+    );
+    const error = await caught(apiPost("/slow", {}, PriceSchema, { timeoutMs: 20 }));
+    expect([error.status, error.code]).toEqual([0, "TIMEOUT"]);
+  });
+
+  it("posts raw bytes with their content type", async () => {
+    let seen: { type: string | null; body: string } | null = null;
+    server.use(
+      http.post(`${API}/upload`, async ({ request }) => {
+        seen = { type: request.headers.get("content-type"), body: await request.text() };
+        return HttpResponse.json({ price: { amount: "1.00", currency: "USD" } });
+      }),
+    );
+    const blob = new Blob(["%PDF-1.4"], { type: "application/pdf" });
+    await expect(apiPostBytes("/upload", blob, "application/pdf", PriceSchema)).resolves.toEqual({
+      price: { amount: "1.00", currency: "USD" },
+    });
+    expect(seen).toEqual({ type: "application/pdf", body: "%PDF-1.4" });
   });
 });

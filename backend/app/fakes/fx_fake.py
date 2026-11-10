@@ -9,7 +9,7 @@ from typing import Final
 
 from app.common.constants import FX_FAKE_SOURCE_NAME
 from app.common.errors import FxUnavailableError
-from app.fx.gateway import FxQuote
+from app.fx import FxQuote
 
 FAKE_RATES: Final = {
     "USD": Decimal("84.000000"),
