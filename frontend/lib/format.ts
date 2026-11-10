@@ -35,3 +35,17 @@ export function formatDate(iso: string): string {
     timeStyle: "short",
   }).format(new Date(iso));
 }
+
+const CENTS_PATTERN = /^(-?)(\d+)\.(\d{2})$/;
+
+/** Exact comparison of 2-decimal money strings (for sorting), via integer cents. */
+export function compareAmounts(a: string, b: string): number {
+  const toCents = (value: string): bigint => {
+    const match = CENTS_PATTERN.exec(value.trim());
+    if (!match) return 0n;
+    const cents = BigInt(`${match[2] ?? "0"}${match[3] ?? "00"}`);
+    return match[1] === "-" ? -cents : cents;
+  };
+  const difference = toCents(a) - toCents(b);
+  return difference === 0n ? 0 : difference > 0n ? 1 : -1;
+}

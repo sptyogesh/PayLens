@@ -41,6 +41,8 @@ def rate_limit(name: str, limit_window: tuple[int, int]) -> Callable[..., None]:
     """Dependency factory: limit a route to `limit` requests per `window` seconds per IP."""
 
     def dependency(request: Request, settings: Annotated[Settings, Depends(get_settings)]) -> None:
+        if not settings.rate_limit_enabled:
+            return
         limiter = get_limiter(name, limit_window)
         check_rate_limit(limiter, client_ip(request, settings.trust_proxy_headers))
 

@@ -113,7 +113,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
   - `.cursor/rules/paylens.mdc` with `alwaysApply: true`, pointing to `AGENTS.md` and `.specify/memory/constitution.md`
   - `.vscode/extensions.json` and `.vscode/settings.json` per Principle XVII
   - `CHANGELOG.md` in Keep a Changelog format with an empty `## [Unreleased]` section
-- [ ] T009 ⚠ **STOP: ask the owner first.** Creating a GitHub Actions workflow needs explicit approval (Principle XIX).
+- [X] T009 ⚠ **STOP: ask the owner first.** Creating a GitHub Actions workflow needs explicit approval (Principle XIX).
   - After approval, create `.github/workflows/ci.yml`. It runs on push and PR.
   - Steps: setup Node (`.nvmrc`), setup uv with Python 3.12, `npm ci` in the root and frontend, `uv sync`, Playwright chromium install, and `npm run check:all`.
   - Use a `postgres:18` service with `TEST_DATABASE_URL`, plus a `paylens_e2e` database.
@@ -275,16 +275,16 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 
 ### Implementation for User Story 1 (each task includes its tests)
 
-- [ ] T033 [P] [US1] Create `backend/app/models/sync_run.py` per data-model.md.
+- [X] T033 [P] [US1] Create `backend/app/models/sync_run.py` per data-model.md.
   - Columns: `trigger`, `period_start`, `period_end`, `started_at`, `finished_at` NULL, `outcome`, `windows_total`, `windows_done`, `added`, `updated`, `skipped`, `flagged` (INT NOT NULL DEFAULT 0), `error_code` VARCHAR(50) NULL, `error_message` VARCHAR(500) NULL.
   - Export it from `models/__init__.py`.
   - Test: insert and read, in `backend/tests/integration/models/test_sync_run.py`.
-- [ ] T034 [P] [US1] Create `backend/app/paypal/classify.py`.
+- [X] T034 [P] [US1] Create `backend/app/paypal/classify.py`.
   - `classify(event_code, amount, status) -> TransactionKind`, following research R2: income only when the code is in `INCOME_EVENT_CODES` **and** the amount is > 0; the same code with amount < 0 is `outgoing_payment`; prefix rules give refund/withdrawal/conversion/hold/fee; anything else is `other`.
   - `map_status("S"|"P"|"D"|"V") -> TransactionStatus`.
   - `counts_as_income(kind, status)` is true only for income with status completed or pending.
   - Tests in `backend/tests/unit/paypal/test_classify.py`: every listed code; T0400/T1107/T0200/T2105/T0107; an unknown code gives `other`; **P8** a withdrawal or refund is not income; D/V are not income.
-- [ ] T035 [P] [US1] Extend `backend/app/paypal/schemas.py` with Transaction Search models (`SearchResponse`, `TransactionDetail`, `TransactionInfo`, `PayerInfo`, `PayerName`, `AmountWithCurrency`), using only the fields in research R2–R6.
+- [X] T035 [P] [US1] Extend `backend/app/paypal/schemas.py` with Transaction Search models (`SearchResponse`, `TransactionDetail`, `TransactionInfo`, `PayerInfo`, `PayerName`, `AmountWithCurrency`), using only the fields in research R2–R6.
   - Create `backend/app/paypal/mapper.py` with `from_search_row(detail) -> TransactionUpsert`, a typed DTO:
     - `fee = abs(fee_amount.value)`, or `0.00` in the transaction currency when missing (**P7**)
     - `net = gross − fee` (Decimal)
@@ -294,18 +294,18 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - `raw_json` kept
   - Fixtures: `backend/tests/fixtures/paypal/search_page_*.json`.
   - Tests in `backend/tests/unit/paypal/test_mapper.py`: negative fee, positive fee, missing fee, missing payer email, name fallbacks.
-- [ ] T036 [US1] Create `backend/app/paypal/transactions_api.py`: `fetch_page(gateway_http, start, end, page) -> SearchResponse`, calling `GET /v1/reporting/transactions` with `start_date`, `end_date`, `fields=all`, `balance_affecting_records_only=N`, `page_size=PAYPAL_PAGE_SIZE` and `page` starting at 1 (research R4). It goes through `send_with_retry` and the 401 helper.
+- [X] T036 [US1] Create `backend/app/paypal/transactions_api.py`: `fetch_page(gateway_http, start, end, page) -> SearchResponse`, calling `GET /v1/reporting/transactions` with `start_date`, `end_date`, `fields=all`, `balance_affecting_records_only=N`, `page_size=PAYPAL_PAGE_SIZE` and `page` starting at 1 (research R4). It goes through `send_with_retry` and the 401 helper.
   - Add `search_transactions(start, end, page)` to the `PayPalGateway` Protocol, `HttpPayPalGateway` and `FakePayPalGateway`. The fake returns 12 deterministic rows (10 income T0006/T0000, 1 T0400 withdrawal, 1 T1107 refund) across 2 pages.
   - Tests in `backend/tests/unit/paypal/test_transactions_api.py` (respx): the query params are exact; the parsed response.
-- [ ] T037 [US1] Create `backend/app/paypal/upsert.py`.
+- [X] T037 [US1] Create `backend/app/paypal/upsert.py`.
   - `upsert_client(session, payer) -> Client`: by lower-cased email; creates it the first time with country and currency; otherwise uses the single unknown client.
   - `upsert_transaction(session, dto) -> Literal["added","updated"]`:
     - matches by `paypal_transaction_id`
     - on update, refreshes the PayPal-derived columns, sets `source=paypal_sandbox` and `origin=transaction_search`, and **never touches the 002/004 columns**
   - Tests in `backend/tests/integration/paypal/test_upsert.py`: **P3** the same DTO twice gives 1 row; status pending → completed updates the row; a new payer creates a client; a known payer is reused; a missing email links to the unknown client.
-- [ ] T038 [US1] Create `backend/app/services/sync_lock.py`: a `sync_lock(engine)` context manager using `pg_try_advisory_lock(SYNC_LOCK_KEY)` on a dedicated connection, released in `finally`. It raises `SyncInProgressError` when the lock is not acquired.
+- [X] T038 [US1] Create `backend/app/services/sync_lock.py`: a `sync_lock(engine)` context manager using `pg_try_advisory_lock(SYNC_LOCK_KEY)` on a dedicated connection, released in `finally`. It raises `SyncInProgressError` when the lock is not acquired.
   - Tests in `backend/tests/integration/services/test_sync_lock.py`: a second acquire while the first is held raises; it can be acquired again after release.
-- [ ] T039 [US1] Create `backend/app/paypal/sync.py`: `run_sync(session_factory, gateway, start, end) -> SyncCounts`, the coordinator.
+- [X] T039 [US1] Create `backend/app/paypal/sync.py`: `run_sync(session_factory, gateway, start, end) -> SyncCounts`, the coordinator.
   - Split windows with `split_windows(…, PAYPAL_WINDOW_DAYS)`. For each window, loop pages while `page < total_pages`, stopping at `PAYPAL_MAX_PAGES_PER_WINDOW` (flag the window and mark the run partial).
   - Classify and map each row. Within one run, de-duplicate rows that share a transaction ID, keeping the income row; the other is counted as `flagged` and logged without `raw_json` (research R5).
   - Upsert. Non-income rows count as `skipped`.
@@ -321,7 +321,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - **P8** a withdrawal/refund is stored with `kind ≠ income` and counted as skipped
     - a duplicate ID in a page is flagged
     - `total_pages = 0`
-- [ ] T040 [US1] Create `backend/app/services/sync_service.py`.
+- [X] T040 [US1] Create `backend/app/services/sync_service.py`.
   - `start_sync(trigger, start, end) -> SyncRun`:
     - validates the period (`start < end`, `end <= now`, else `InvalidPeriodError`); the default is the last `SYNC_DEFAULT_DAYS`
     - takes `sync_lock`, inserts a `running` row, calls `run_sync`, then stores outcome `success`/`partial`/`failed` with `error_code`/`error_message`
@@ -329,9 +329,9 @@ Phase 1 (Setup) and Phase 2 (Foundational).
   - `get_last_run()` reports a `running` row older than `SYNC_STALE_AFTER_MINUTES` as failed.
   - `run_startup_sync()` runs in a background thread and swallows the error after recording it (FR-021).
   - Tests in `backend/tests/integration/services/test_sync_service.py`: success counts; a failed PayPal call gives outcome failed with a safe message; a stale row is reported as failed; an invalid period; the lock is held, so `SyncInProgressError`.
-- [ ] T041 [US1] Create `backend/app/schemas/sync.py` (`SyncRunOut`, `SyncRequest` with optional `start`/`end`, `PeriodOut`, `CountsOut`, `WindowsOut`, `SyncErrorOut`, per contracts/http-api.md), `backend/app/services/transaction_service.py` (`list_transactions(limit 1–200 default 100, offset ≥ 0, kind default income | all, source optional)`, newest first, joined with client), and `backend/app/schemas/transaction.py` (`TransactionOut` with `MoneyOut` gross/fee/net, `source`, `is_flagged`, and **no** `raw_json`, `flag_reason` or `origin`).
+- [X] T041 [US1] Create `backend/app/schemas/sync.py` (`SyncRunOut`, `SyncRequest` with optional `start`/`end`, `PeriodOut`, `CountsOut`, `WindowsOut`, `SyncErrorOut`, per contracts/http-api.md), `backend/app/services/transaction_service.py` (`list_transactions(limit 1–200 default 100, offset ≥ 0, kind default income | all, source optional)`, newest first, joined with client), and `backend/app/schemas/transaction.py` (`TransactionOut` with `MoneyOut` gross/fee/net, `source`, `is_flagged`, and **no** `raw_json`, `flag_reason` or `origin`).
   - Tests in `backend/tests/integration/services/test_transaction_service.py`: order, filters, paging.
-- [ ] T042 [US1] Create `backend/app/api/routes/sync.py`: `POST /sync` with the `rate_limit("sync", RATE_LIMIT_SYNC)` dependency, returning 200 `SyncRunOut`; `GET /sync/last` returning `SyncRunOut | null`.
+- [X] T042 [US1] Create `backend/app/api/routes/sync.py`: `POST /sync` with the `rate_limit("sync", RATE_LIMIT_SYNC)` dependency, returning 200 `SyncRunOut`; `GET /sync/last` returning `SyncRunOut | null`.
   - Create `backend/app/api/routes/transactions.py`: `GET /transactions`.
   - Register both. Add the startup sync to the lifespan, skipped when `app_env == "test"` unless enabled by a fixture.
   - Tests in `backend/tests/integration/api/test_sync_api.py` and `test_transactions_api.py`:
@@ -341,19 +341,19 @@ Phase 1 (Setup) and Phase 2 (Foundational).
     - 400 `INVALID_PERIOD`
     - 429 on the 4th `POST /sync` within 60 s, with `Retry-After`
     - startup sync failure leaves the app up and `GET /sync/last` shows failed
-- [ ] T043 [US1] Run `npm run gen:api`. Add zod schemas `SyncRunSchema`, `TransactionSchema` and `TransactionListSchema` to `frontend/lib/api/schemas.ts`, matching the generated types (type-level assertion), and add MSW handlers for `/sync`, `/sync/last` and `/transactions` in `frontend/test/msw/handlers.ts`.
-- [ ] T044 [P] [US1] Create `frontend/features/transactions/useTransactions.ts` (`useApi` on `/transactions`) and `frontend/features/transactions/useSync.ts` (`useMutation` on `POST /sync`, then reload the list and `/sync/last`).
+- [X] T043 [US1] Run `npm run gen:api`. Add zod schemas `SyncRunSchema`, `TransactionSchema` and `TransactionListSchema` to `frontend/lib/api/schemas.ts`, matching the generated types (type-level assertion), and add MSW handlers for `/sync`, `/sync/last` and `/transactions` in `frontend/test/msw/handlers.ts`.
+- [X] T044 [P] [US1] Create `frontend/features/transactions/useTransactions.ts` (`useApi` on `/transactions`) and `frontend/features/transactions/useSync.ts` (`useMutation` on `POST /sync`, then reload the list and `/sync/last`).
   - Tests beside each, using MSW.
-- [ ] T045 [P] [US1] Create `frontend/features/transactions/TransactionsGrid.tsx`.
+- [X] T045 [P] [US1] Create `frontend/features/transactions/TransactionsGrid.tsx`.
   - Column definitions for `DataGrid`: date (IST via `formatDate`), client, gross/fee/net (`MoneyText`), status, source (`Badge`), and a flagged marker.
   - Test: every row shows a source badge, in `TransactionsGrid.test.tsx`.
-- [ ] T046 [P] [US1] Create `frontend/features/transactions/SyncPanel/` (`index.ts`, `SyncPanel.tsx` with the Sync now `Button`, disabled while running, plus `Spinner`) and its grandchild `SyncResult.tsx`.
+- [X] T046 [P] [US1] Create `frontend/features/transactions/SyncPanel/` (`index.ts`, `SyncPanel.tsx` with the Sync now `Button`, disabled while running, plus `Spinner`) and its grandchild `SyncResult.tsx`.
   - `SyncResult` shows added/updated/skipped/flagged, the period, the finished time, the error (`ErrorState`), the hint, and the 409/429 messages from constants.
   - Tests beside each component.
-- [ ] T047 [US1] Create `frontend/features/transactions/TransactionsView.tsx` (the parent: `PageHeader`, `SyncPanel`, `TransactionsGrid`, plus loading, empty and error states) and `frontend/features/transactions/index.ts`.
+- [X] T047 [US1] Create `frontend/features/transactions/TransactionsView.tsx` (the parent: `PageHeader`, `SyncPanel`, `TransactionsGrid`, plus loading, empty and error states) and `frontend/features/transactions/index.ts`.
   - Create `frontend/app/transactions/page.tsx`, which only renders `TransactionsView`.
   - Test: `TransactionsView.test.tsx` covers the error state with retry.
-- [ ] T048 [US1] Write the E2E tests in `frontend/e2e/transactions.spec.ts`:
+- [X] T048 [US1] Write the E2E tests in `frontend/e2e/transactions.spec.ts`:
   - **E2** Sync now: success message, then 10 rows
   - Sync again: 0 added, still 10 rows
   - **E3** (source part) a "PayPal sandbox" badge on every row
@@ -364,7 +364,7 @@ Phase 1 (Setup) and Phase 2 (Foundational).
 
 ### Verification for User Story 1
 
-- [ ] T049 [US1] Verification run: `npm run check:all`. Fix the root cause and re-run until green. Stop and report after 3 failed attempts on the same issue.
+- [X] T049 [US1] Verification run: `npm run check:all`. Fix the root cause and re-run until green. Stop and report after 3 failed attempts on the same issue.
 - [ ] T050 [US1] Request commit approval. Show the verification report, the changed files, the proposed commit `feat(sync): sync PayPal sandbox transactions` and the exact command. Wait for the owner.
 
 **Checkpoint**: US1 works and is independently testable. M1 is demonstrable with sandbox data synced from PayPal.

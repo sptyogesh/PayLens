@@ -21,11 +21,14 @@ class Settings(BaseSettings):
     frontend_url: str = ""
     trust_proxy_headers: bool = False
     startup_sync_enabled: bool = True
+    rate_limit_enabled: bool = True
 
     @model_validator(mode="after")
     def check_safety_rules(self) -> "Settings":
         if self.paypal_mode == "fake" and self.app_env != "test":
             raise ValueError("PAYPAL_MODE=fake is only allowed when APP_ENV=test")
+        if not self.rate_limit_enabled and self.app_env != "test":
+            raise ValueError("RATE_LIMIT_ENABLED=false is only allowed when APP_ENV=test")
         if self.paypal_base_url.rstrip("/") != PAYPAL_SANDBOX_BASE_URL:
             raise ValueError(f"PAYPAL_BASE_URL must be the sandbox URL {PAYPAL_SANDBOX_BASE_URL}")
         if self.paypal_mode == "http" and not (self.paypal_client_id and self.paypal_client_secret):
