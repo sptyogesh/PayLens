@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.common.errors import PaymentDeclinedError
 from app.common.types import TransactionOrigin, TransactionSource
+from app.fakes.fx_fake import FakeFxGateway
 from app.fakes.paypal_fake import FakePayPalGateway
 from app.models import Transaction
 from app.schemas.pay import PayOrderIn
@@ -21,7 +22,7 @@ def order(amount: str = "50.00") -> PayOrderIn:
 def test_success_records_one_paypal_sandbox_row(session_factory: sessionmaker[Session]) -> None:
     gateway = FakePayPalGateway()
     order_id = create_order(gateway, order())
-    out = capture_and_record(gateway, session_factory, order_id)
+    out = capture_and_record(gateway, session_factory, order_id, FakeFxGateway())
     assert (out.recorded, out.status, out.gross.amount, out.gross.currency) == (
         True,
         "completed",
@@ -35,13 +36,26 @@ def test_success_records_one_paypal_sandbox_row(session_factory: sessionmaker[Se
         TransactionSource.PAYPAL_SANDBOX,
         TransactionOrigin.CHECKOUT_CAPTURE,
     )
+    assert stored.total_leakage_inr is not None  # FR-020: leakage right after /pay
+
+
+def test_fx_outage_does_not_change_the_payment_result(
+    session_factory: sessionmaker[Session],
+) -> None:
+    gateway = FakePayPalGateway()
+    order_id = create_order(gateway, order())
+    out = capture_and_record(gateway, session_factory, order_id, FakeFxGateway(unavailable=True))
+    assert (out.recorded, out.status) == (True, "completed")
+    with session_factory() as session:
+        (stored,) = session.scalars(select(Transaction))
+    assert stored.total_leakage_inr is None
 
 
 def test_declined_payment_stores_nothing(session_factory: sessionmaker[Session]) -> None:
     gateway = FakePayPalGateway()
     order_id = create_order(gateway, order("13.13"))
     with pytest.raises(PaymentDeclinedError):
-        capture_and_record(gateway, session_factory, order_id)
+        capture_and_record(gateway, session_factory, order_id, FakeFxGateway())
     with session_factory() as session:
         assert session.scalars(select(Transaction)).first() is None
 
@@ -53,5 +67,6 @@ def test_db_failure_still_confirms_with_recorded_false() -> None:
         yield  # pragma: no cover
 
     gateway = FakePayPalGateway()
-    out = capture_and_record(gateway, broken_factory, create_order(gateway, order()))  # type: ignore[arg-type]
+    order_id = create_order(gateway, order())
+    out = capture_and_record(gateway, broken_factory, order_id, FakeFxGateway())  # type: ignore[arg-type]
     assert (out.recorded, out.status) == (False, "completed")

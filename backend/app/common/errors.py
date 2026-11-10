@@ -61,6 +61,13 @@ class PayPalError(AppError):
     code = "PAYPAL_UNAVAILABLE"
 
 
+class FxUnavailableError(AppError):
+    """The FX rate source could not be reached. Leakage stays "rate unavailable" (FR-005)."""
+
+    http_status = 502
+    code = "FX_UNAVAILABLE"
+
+
 class RateLimitedError(AppError):
     http_status = 429
     code = "RATE_LIMITED"

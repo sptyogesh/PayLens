@@ -1,4 +1,4 @@
-import type { CaptureOut, SyncRun, Transaction, TransactionList } from "@/lib/api/schemas";
+import type { CaptureOut, Leakage, SyncRun, Transaction, TransactionList } from "@/lib/api/schemas";
 
 export function syncRun(overrides: Partial<SyncRun> = {}): SyncRun {
   return {
@@ -16,6 +16,24 @@ export function syncRun(overrides: Partial<SyncRun> = {}): SyncRun {
   };
 }
 
+const inr = (amount: string) => ({ amount, currency: "INR" });
+
+/** 100.00 USD, fee 4.70, mid 84.000000, simulated 81.480000 (values from the backend engine). */
+export function leakage(overrides: Partial<Leakage> = {}): Leakage {
+  return {
+    mid_market_rate: "84.000000",
+    paypal_rate: "81.480000",
+    paypal_rate_simulated: true,
+    ideal_inr: inr("8400.00"),
+    inr_received: inr("7765.04"),
+    fee_loss_inr: inr("394.80"),
+    fx_loss_inr: inr("240.16"),
+    total_leakage_inr: inr("634.96"),
+    leakage_percent: "7.56",
+    ...overrides,
+  };
+}
+
 export function transaction(overrides: Partial<Transaction> = {}): Transaction {
   return {
     id: "t-1",
@@ -29,6 +47,8 @@ export function transaction(overrides: Partial<Transaction> = {}): Transaction {
     net: { amount: "95.30", currency: "USD" },
     source: "paypal_sandbox",
     is_flagged: false,
+    leakage_status: "calculated",
+    leakage: leakage(),
     ...overrides,
   };
 }

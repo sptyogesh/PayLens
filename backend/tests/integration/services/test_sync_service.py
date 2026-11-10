@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.common.dates import utc_now
 from app.common.errors import InvalidPeriodError, PayPalError, SyncInProgressError
 from app.common.types import SyncOutcome, SyncTrigger
+from app.fakes.fx_fake import FakeFxGateway
 from app.fakes.paypal_fake import FakePayPalGateway
 from app.models import SyncRun
 from app.paypal.dto import SearchPage
@@ -61,7 +62,7 @@ def test_second_sync_is_refused_while_one_runs(
 def test_startup_failure_is_recorded_and_not_raised(
     session_factory: sessionmaker[Session], db_engine: Engine, db_session: Session
 ) -> None:
-    run_startup_sync(session_factory, db_engine, FailingGateway())
+    run_startup_sync(session_factory, db_engine, FailingGateway(), FakeFxGateway())
     last = get_last_run(db_session)
     assert last is not None
     assert (last.trigger, last.outcome) == (SyncTrigger.STARTUP, SyncOutcome.FAILED)

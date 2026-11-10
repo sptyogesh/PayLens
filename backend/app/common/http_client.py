@@ -24,8 +24,8 @@ UNAVAILABLE_MESSAGE = "PayPal is not responding right now. Please try again in a
 Sleep = Callable[[float], None]
 
 
-def make_client(base_url: str) -> httpx.Client:
-    return httpx.Client(base_url=base_url, timeout=HTTP_TIMEOUT_S)
+def make_client(base_url: str, timeout_s: float = HTTP_TIMEOUT_S) -> httpx.Client:
+    return httpx.Client(base_url=base_url, timeout=timeout_s)
 
 
 def backoff_delay(attempt: int) -> float:

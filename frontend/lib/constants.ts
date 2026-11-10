@@ -97,3 +97,25 @@ export const PAY_TEXT = {
     description: `Use at most ${CHECKOUT_DESCRIPTION_MAX} characters.`,
   },
 } as const;
+
+export const LEAKAGE_TEXT = {
+  midRate: "Mid-market rate",
+  paypalRate: `PayPal rate (${DISCLAIMERS.simulated})`,
+  inrReceived: `INR received (${DISCLAIMERS.simulated})`,
+  feeLoss: "Fee loss",
+  fxLoss: `FX loss (${DISCLAIMERS.simulated})`,
+  totalLeakage: "Total leakage",
+  leakagePercent: "Leakage %",
+  status: {
+    rate_unavailable: "Rate unavailable",
+    not_calculated: "Not calculated",
+    not_applicable: "—",
+  },
+  statusHint: {
+    rate_unavailable: "No exchange rate yet. It is fetched again on the next sync.",
+    not_calculated: "The fee is larger than the payment, so leakage is not calculated.",
+    not_applicable: "Only completed income has leakage.",
+  },
+  simulatedNote:
+    "PayPal rate is simulated for the sandbox: the mid-market reference rate minus a fixed spread.",
+} as const;

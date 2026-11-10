@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.common.types import TransactionKind, TransactionSource, TransactionStatus
 from app.models import Transaction
 from app.schemas.common import MoneyOut, UtcDatetime
+from app.schemas.leakage import LeakageOut, LeakageStatus, leakage_out, leakage_status
 
 
 class ClientRef(BaseModel):
@@ -27,6 +28,8 @@ class TransactionOut(BaseModel):
     net: MoneyOut
     source: TransactionSource
     is_flagged: bool
+    leakage_status: LeakageStatus
+    leakage: LeakageOut | None
 
     @classmethod
     def from_model(cls, row: Transaction) -> "TransactionOut":
@@ -42,6 +45,8 @@ class TransactionOut(BaseModel):
             net=MoneyOut.of(row.net_amount, row.currency),
             source=row.source,
             is_flagged=row.is_flagged,
+            leakage_status=leakage_status(row),
+            leakage=leakage_out(row),
         )
 
 

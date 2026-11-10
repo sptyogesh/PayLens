@@ -1,9 +1,12 @@
 import {
   absoluteAmount,
   compareAmounts,
+  compareOptionalAmounts,
   formatDate,
   formatINR,
   formatMoney,
+  formatPercent,
+  formatRate,
   isNegativeAmount,
 } from "./format";
 
@@ -62,5 +65,25 @@ describe("compareAmounts", () => {
     ]);
     expect(compareAmounts("9007199254740993.01", "9007199254740993.00")).toBe(1);
     expect(compareAmounts("5.00", "5.00")).toBe(0);
+  });
+});
+
+describe("leakage display helpers", () => {
+  it("formats percent and rate strings without arithmetic", () => {
+    expect(formatPercent("7.25")).toBe("7.25%");
+    expect(formatRate("84.000000")).toBe("₹84.000000");
+  });
+
+  it("sorts missing values last in both directions", () => {
+    const values = [null, "5.00", "-1.00", null, "10.00"];
+    expect([...values].sort((a, b) => compareOptionalAmounts(a, b))).toEqual([
+      "-1.00",
+      "5.00",
+      "10.00",
+      null,
+      null,
+    ]);
+    expect(compareOptionalAmounts(null, "1.00", true)).toBe(-1);
+    expect(compareOptionalAmounts("1.00", undefined, true)).toBe(1);
   });
 });

@@ -41,6 +41,31 @@ export const SyncRunSchema = z.object({
 export type SyncRun = z.infer<typeof SyncRunSchema>;
 export const LastSyncSchema = SyncRunSchema.nullable();
 
+export const RateSchema = z.string().regex(/^\d+\.\d{6}$/, "rate must be a 6-decimal string");
+export const PercentSchema = z
+  .string()
+  .regex(/^-?\d+\.\d{2}$/, "percent must be a 2-decimal string");
+
+export const LeakageSchema = z.object({
+  mid_market_rate: RateSchema,
+  paypal_rate: RateSchema,
+  paypal_rate_simulated: z.literal(true),
+  ideal_inr: MoneySchema,
+  inr_received: MoneySchema,
+  fee_loss_inr: MoneySchema,
+  fx_loss_inr: MoneySchema,
+  total_leakage_inr: MoneySchema,
+  leakage_percent: PercentSchema.nullable(),
+});
+export type Leakage = z.infer<typeof LeakageSchema>;
+export const LeakageStatusSchema = z.enum([
+  "calculated",
+  "rate_unavailable",
+  "not_calculated",
+  "not_applicable",
+]);
+export type LeakageStatus = z.infer<typeof LeakageStatusSchema>;
+
 export const TransactionSchema = z.object({
   id: z.string(),
   paypal_transaction_id: z.string(),
@@ -62,6 +87,8 @@ export const TransactionSchema = z.object({
   net: MoneySchema,
   source: SourceSchema,
   is_flagged: z.boolean(),
+  leakage_status: LeakageStatusSchema,
+  leakage: LeakageSchema.nullable(),
 });
 export type Transaction = z.infer<typeof TransactionSchema>;
 

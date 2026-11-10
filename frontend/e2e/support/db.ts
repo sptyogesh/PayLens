@@ -5,7 +5,13 @@ const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL ?? "postgresql+psycopg:///
 
 function runBackendScript(...args: string[]): void {
   execFileSync("uv", ["run", "--directory", "../backend", "python", "-m", ...args], {
-    env: { ...process.env, APP_ENV: "test", PAYPAL_MODE: "fake", DATABASE_URL: E2E_DATABASE_URL },
+    env: {
+      ...process.env,
+      APP_ENV: "test",
+      PAYPAL_MODE: "fake",
+      FX_MODE: "fake",
+      DATABASE_URL: E2E_DATABASE_URL,
+    },
     stdio: "ignore",
   });
 }

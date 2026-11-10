@@ -1,7 +1,7 @@
 """Load or reset demo history labelled "Demo seed" (FR-040, FR-041).
 
 Usage (from backend/):
-    uv run python -m scripts.seed_demo           # add or refresh 24 demo rows
+    uv run python -m scripts.seed_demo           # add or refresh 24 demo rows, then leakage
     uv run python -m scripts.seed_demo --reset   # remove demo rows only
 """
 
@@ -9,9 +9,11 @@ import argparse
 
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_fx_gateway
 from app.common.dates import utc_now
 from app.db import get_engine, get_session_factory
 from app.models import Base
+from app.services.leakage_service import safe_recalculate
 from app.services.seed_service import (
     count_seed_rows,
     months_before,
@@ -47,6 +49,10 @@ def main(argv: list[str] | None = None) -> None:
             added = seed(session)
             message = f"Added {added} demo transactions; {count_seed_rows(session)} in total."
         session.commit()
+    summary = safe_recalculate(get_session_factory(), get_fx_gateway())  # FR-020
+    if summary is not None:
+        message += f" Leakage: {summary.calculated} calculated, "
+        message += f"{summary.rate_unavailable} waiting for an exchange rate."
     print(message)
 
 
