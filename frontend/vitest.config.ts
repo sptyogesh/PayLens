@@ -13,7 +13,7 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     include: ["**/*.test.{ts,tsx}"],
     exclude: ["node_modules/**", "e2e/**", ".next/**"],
-    env: { NEXT_PUBLIC_API_URL: "http://api.test" },
+    env: { NEXT_PUBLIC_API_URL: "http://api.test", NEXT_PUBLIC_PAYPAL_MODE: "fake" },
     coverage: {
       provider: "v8",
       include: ["components/ui/**", "lib/**"],

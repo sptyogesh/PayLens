@@ -72,10 +72,59 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/pay/orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Post Order */
+    post: operations["post_order_pay_orders_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/pay/orders/{order_id}/capture": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Post Capture */
+    post: operations["post_capture_pay_orders__order_id__capture_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** CaptureOut */
+    CaptureOut: {
+      /** Transaction Id */
+      transaction_id: string;
+      /** Order Id */
+      order_id: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "completed" | "pending";
+      gross: components["schemas"]["MoneyOut"];
+      /** Recorded */
+      recorded: boolean;
+    };
     /** ClientRef */
     ClientRef: {
       /**
@@ -110,6 +159,23 @@ export interface components {
       amount: string;
       /** Currency */
       currency: string;
+    };
+    /** PayOrderIn */
+    PayOrderIn: {
+      /** Amount */
+      amount: string;
+      /**
+       * Currency
+       * @enum {string}
+       */
+      currency: "USD" | "GBP" | "EUR" | "AUD";
+      /** Description */
+      description?: string | null;
+    };
+    /** PayOrderOut */
+    PayOrderOut: {
+      /** Order Id */
+      order_id: string;
     };
     /** PeriodOut */
     PeriodOut: {
@@ -354,6 +420,70 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TransactionListOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  post_order_pay_orders_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PayOrderIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayOrderOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  post_capture_pay_orders__order_id__capture_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        order_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CaptureOut"];
         };
       };
       /** @description Validation Error */

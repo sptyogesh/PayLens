@@ -77,3 +77,23 @@ export const TRANSACTION_STATUS_LABELS = {
   denied: "Denied",
   reversed: "Reversed",
 } as const;
+
+export const PAY_TEXT = {
+  title: "Pay (sandbox)",
+  formTitle: "Pay the freelancer",
+  amountLabel: "Amount",
+  currencyLabel: "Currency",
+  descriptionLabel: "Description (optional)",
+  fakeButton: "Pay (test mode)",
+  processing: "Processing payment…",
+  successTitle: "Payment received",
+  transactionIdLabel: "PayPal transaction ID",
+  notRecorded: "The payment went through. It will appear in PayLens after the next sync.",
+  noPayment: "No payment was made.",
+  errors: {
+    amountFormat: "Enter an amount like 50 or 50.00 (at most 2 decimals).",
+    amountMin: "The amount must be more than 0.",
+    amountMax: `The amount must be at most ${CHECKOUT_MAX_AMOUNT}.`,
+    description: `Use at most ${CHECKOUT_DESCRIPTION_MAX} characters.`,
+  },
+} as const;

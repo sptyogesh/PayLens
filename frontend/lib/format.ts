@@ -49,3 +49,9 @@ export function compareAmounts(a: string, b: string): number {
   const difference = toCents(a) - toCents(b);
   return difference === 0n ? 0 : difference > 0n ? 1 : -1;
 }
+
+/** "50" → "50.00", "5.5" → "5.50" (string padding only, no arithmetic). */
+export function toTwoDecimals(amount: string): string {
+  const [whole = "0", fraction = ""] = amount.trim().split(".");
+  return `${whole}.${fraction.padEnd(2, "0").slice(0, 2)}`;
+}

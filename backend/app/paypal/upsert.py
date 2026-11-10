@@ -1,5 +1,6 @@
 """Idempotent storage of PayPal transactions and client linking (Principle VIII, FR-015, FR-017)."""
 
+from dataclasses import replace
 from typing import Literal
 
 from sqlalchemy import select
@@ -10,6 +11,7 @@ from app.common.constants import UNKNOWN_CLIENT_NAME
 from app.common.types import TransactionOrigin, TransactionSource
 from app.models import Client, Transaction
 from app.paypal.dto import PayerData, TransactionUpsert
+from app.paypal.reconcile import reconcile
 
 UpsertResult = Literal["added", "updated"]
 
@@ -68,6 +70,12 @@ def upsert_transaction(session: Session, dto: TransactionUpsert) -> UpsertResult
     existing = session.scalar(
         select(Transaction).where(Transaction.paypal_transaction_id == dto.paypal_transaction_id)
     )
+    if existing is None:
+        existing, flag_reason = reconcile(session, dto)
+        if existing is not None:
+            existing.paypal_transaction_id = dto.paypal_transaction_id
+        elif flag_reason is not None:
+            dto = replace(dto, flag_reason=dto.flag_reason or flag_reason)
     if existing is not None:
         apply(existing, dto, client)
         return "updated"
