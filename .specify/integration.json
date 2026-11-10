@@ -1,0 +1,30 @@
+{
+  "version": "1.3.4.dev0",
+  "integration_state_schema": 1,
+  "installed_integrations": [
+    "claude",
+    "cursor-agent",
+    "opencode",
+    "agy"
+  ],
+  "integration_settings": {
+    "claude": {
+      "script": "sh",
+      "invoke_separator": "-"
+    },
+    "cursor-agent": {
+      "script": "sh",
+      "invoke_separator": "-"
+    },
+    "opencode": {
+      "script": "sh",
+      "invoke_separator": "."
+    },
+    "agy": {
+      "script": "sh",
+      "invoke_separator": "-"
+    }
+  },
+  "integration": "claude",
+  "default_integration": "claude"
+}
