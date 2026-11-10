@@ -10,6 +10,7 @@ from app.common.constants import (
     FX_API_DEFAULT_URL,
     LLM_DEFAULT_API_URL,
     LLM_DEFAULT_MODEL,
+    LOCAL_PROXY,
     PAYPAL_SANDBOX_BASE_URL,
 )
 
@@ -24,7 +25,8 @@ class Settings(BaseSettings):
     paypal_base_url: str = PAYPAL_SANDBOX_BASE_URL
     database_url: str = Field(min_length=1)
     frontend_url: str = ""
-    trust_proxy_headers: bool = False
+    # Proxies allowed to set X-Forwarded-For (uvicorn format: IPs/CIDRs, comma-separated).
+    forwarded_allow_ips: str = LOCAL_PROXY
     startup_sync_enabled: bool = True
     rate_limit_enabled: bool = True
     fx_mode: Literal["http", "fake"] = "http"

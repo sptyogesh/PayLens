@@ -375,3 +375,10 @@ behaviour need real PostgreSQL. SQLite would hide real bugs.
   and up to 3 h Transaction Search delay): R1 capture ID == Transaction Search ID, R2 "Send money"
   event code, R3 fee sign, R4 page indexing with more than one page. Owner action: make 8–12 sandbox
   payments on `/pay`, wait, then press Sync now (quickstart V5–V8).
+
+## Update (hardening fix 1, 2026-11-10): proxy headers
+`TRUST_PROXY_HEADERS` (first/last `X-Forwarded-For` entry) is replaced by uvicorn's
+`ProxyHeadersMiddleware` with `FORWARDED_ALLOW_IPS` (trusted proxy IPs/CIDRs): the client is the
+first untrusted address counted from the right, so spoofed entries are ignored and each real client
+keeps its own limit. `"*"` must not be used (uvicorn then takes the left-most entry). On Render the
+private ranges are trusted; confirm after the first deploy that two devices get separate limits.

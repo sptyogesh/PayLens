@@ -77,6 +77,6 @@ def rate_limit(
         if global_window is not None:
             check_rate_limit(get_limiter(f"{name}:all", global_window), GLOBAL_KEY)
         limiter = get_limiter(name, limit_window)
-        check_rate_limit(limiter, client_ip(request, settings.trust_proxy_headers))
+        check_rate_limit(limiter, client_ip(request))
 
     return dependency

@@ -50,6 +50,7 @@ CHECKOUT_RECONCILE_WINDOW_HOURS: Final = 72
 # --- Rate limits (research R8): (requests, window seconds) per client IP ---
 RATE_LIMIT_SYNC: Final = (3, 60)
 RATE_LIMIT_PAY: Final = (10, 60)
+LOCAL_PROXY: Final = "127.0.0.1"  # default trusted proxy: only a proxy on the same machine
 # Routes that call the LLM also share one cap for all clients together (cost guard).
 RATE_LIMIT_LLM_GLOBAL: Final = (60, 60)
 RATE_LIMIT_PRUNE_ABOVE: Final = 1000

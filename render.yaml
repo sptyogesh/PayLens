@@ -15,7 +15,7 @@ services:
     rootDir: backend
     plan: free
     buildCommand: uv sync --frozen --no-dev
-    startCommand: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers
     healthCheckPath: /health
     autoDeployTrigger: checksPass
     envVars:
@@ -37,8 +37,13 @@ services:
         sync: false
       - key: FRONTEND_URL  # the paylens-web URL, e.g. https://paylens-web.onrender.com
         sync: false
-      - key: TRUST_PROXY_HEADERS
-        value: "true"
+      # Proxies allowed to set X-Forwarded-For. Render's load balancers reach the service from the
+      # private network, so the private ranges are trusted and the client address is the first
+      # untrusted entry from the right (entries a client sends itself are ignored). After the first
+      # deploy, confirm two devices get separate rate limits; never set "*" (it trusts the
+      # left-most, client-controlled entry).
+      - key: FORWARDED_ALLOW_IPS
+        value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1"
       - key: STARTUP_SYNC_ENABLED
         value: "true"
       - key: FX_MODE

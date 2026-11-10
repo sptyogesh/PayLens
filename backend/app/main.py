@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.api.deps import get_fx_gateway, get_gateway
 from app.api.routes import ROUTERS
@@ -40,6 +41,10 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type"],
         expose_headers=["Content-Disposition"],  # CA report file name (005)
     )
+    # Added last, so it runs first: the client address is fixed before CORS and rate limits.
+    # Only FORWARDED_ALLOW_IPS proxies may set it; uvicorn's own handling is turned off in the
+    # start command (--no-proxy-headers) so this setting is the single source.
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=get_settings().forwarded_allow_ips)
     register_error_handlers(app)
     for router in ROUTERS:
         app.include_router(router)
