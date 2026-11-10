@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Rate limits behind Render's proxy: the client address is set by uvicorn's proxy-headers middleware, which accepts `X-Forwarded-For` only from proxies listed in the new `FORWARDED_ALLOW_IPS` setting (Render's private ranges in `render.yaml`), so each real client has its own limit and client-sent entries are ignored; replaces `TRUST_PROXY_HEADERS`
 - Rate limits use the address Render's proxy appends (the last `X-Forwarded-For` entry), so a spoofed header can no longer bypass them; LLM routes (`/chat`, `/fira/upload`, `/report*`) also share one global cap; old limiter windows are pruned; FIRA uploads limited to 10 per minute; sync start limited to the last 3 years (Phase 1A hardening)
 - `/chat` no longer returns 500 for extreme dates: tool dates are limited to 2000-01-01–2099-12-31 and any period that cannot be resolved becomes a tool input error the assistant can recover from
 - Sync robustness: a database error or non-JSON PayPal page in one window stops the run with a coded error (`SYNC_STORE_FAILED` / `PAYPAL_REJECTED`) while earlier windows stay stored; an unexpected error records the real partial result; `POST /sync` recalculates leakage even when the sync fails; a `/pay` payment stored during a sync no longer aborts the window (treated as an update)

@@ -54,12 +54,10 @@ class FixedWindowLimiter:
             self._windows.clear()
 
 
-def client_ip(request: Request, trust_proxy_headers: bool) -> str:
-    """Client IP. Behind a trusted proxy (Render) use the LAST X-Forwarded-For entry: the proxy
-    appends the address it saw, while earlier entries are whatever the client sent (spoofable)."""
-    forwarded = request.headers.get("x-forwarded-for", "")
-    if trust_proxy_headers and forwarded:
-        return forwarded.split(",")[-1].strip()
+def client_ip(request: Request) -> str:
+    """The client address. Behind a trusted proxy, uvicorn's ProxyHeadersMiddleware (added in
+    main.py with FORWARDED_ALLOW_IPS) has already replaced it with the first untrusted address
+    counted from the right of X-Forwarded-For, so client-sent (spoofed) entries never count."""
     return request.client.host if request.client else "unknown"
 
 

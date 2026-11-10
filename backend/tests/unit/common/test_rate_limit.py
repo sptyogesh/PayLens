@@ -47,18 +47,9 @@ def make_request(forwarded: str | None, host: str = "10.0.0.1") -> Mock:
     return request
 
 
-def test_proxy_header_used_only_when_trusted() -> None:
-    # The client may send any first entry; the trusted proxy appends the real address last.
-    request = make_request("1.2.3.4, 203.0.113.5")
-    assert client_ip(request, trust_proxy_headers=True) == "203.0.113.5"
-    assert client_ip(request, trust_proxy_headers=False) == "10.0.0.1"
-
-
-def test_spoofed_first_entries_share_the_real_clients_bucket() -> None:
-    limiter = FixedWindowLimiter(1, 60, clock=lambda: 0.0)
-    keys = {client_ip(make_request(f"{n}.0.0.1, 203.0.113.5"), True) for n in range(5)}
-    assert keys == {"203.0.113.5"}
-    assert limiter.hit("203.0.113.5") is None and limiter.hit("203.0.113.5") is not None
+def test_client_ip_is_the_resolved_client_address() -> None:
+    """Header handling lives in uvicorn's ProxyHeadersMiddleware (see the API proxy tests)."""
+    assert client_ip(make_request("203.0.113.5")) == "10.0.0.1"
 
 
 def test_finished_windows_are_pruned() -> None:
