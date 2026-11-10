@@ -18,6 +18,7 @@ Default `last_3_months`. Unknown value → 422 `VALIDATION_ERROR`.
     "leakage_percent": "7.25"
   },
   "excluded_count": 1,
+  "not_calculated_count": 0,
   "sources": ["demo_seed", "paypal_sandbox"],
   "paypal_rate_simulated": true,
   "simulated_spread_percent": "3.00",
@@ -28,6 +29,8 @@ Default `last_3_months`. Unknown value → 422 `VALIDATION_ERROR`.
 
 - `totals` is `null` when the period has no calculated payments (`payment_count` 0) — the UI shows
   an empty state; `excluded_count` still reported.
+- `excluded_count` = eligible rows waiting for a rate (`rate_unavailable`); `not_calculated_count` = eligible rows the engine rejects (fee > gross). Neither is in the totals.
+- `sources` lists only the sources of rows included in the totals.
 - `leakage_percent` is `null` when income is 0.
 - `by_month` newest first; `by_client` by `total_leakage_inr` desc, then label.
 - Σ `by_month[].totals` = Σ `by_client[].totals` = `totals` (exact).

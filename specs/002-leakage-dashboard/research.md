@@ -64,9 +64,11 @@ All findings checked on 2026-11-10. Sources are listed per item.
 - **Decision**: `engine/leakage/calculate.py` implements plan section 10 exactly, rounding
   half-up to 2 dp only on outputs:
   `ideal = G·r_mid`, `received = N·r_pp`, `fee_loss = F·r_mid`, `fx_loss = N·(r_mid − r_pp)`,
-  `total = fee_loss + fx_loss` (sum of the rounded parts, so the displayed parts add up), and
-  `leakage_percent = round2(total / ideal × 100)` (unrounded inputs). Identity
-  `|total − (ideal − received)| ≤ 0.01` is property-tested (L10).
+  `total = round2(fee_loss) + round2(fx_loss)` and `received = round2(ideal) − total`, so every
+  shown identity holds exactly (fee + FX = total, ideal − received = total, cards = Σ breakdown
+  rows). Each value stays within ₹0.015 of its exact section 10 value; this is property-tested
+  (L10). `leakage_percent = round2(exact total / exact ideal × 100)`. (Changed after the US2
+  review: rounding the total separately made the cards differ by ₹0.01.)
 - `ideal_inr` and `leakage_percent` are **derived at read time** from stored values with the same
   engine function (no new column on `transactions`, so no migration is needed;
   `Base.metadata.create_all` only adds the new `fx_rates` table).

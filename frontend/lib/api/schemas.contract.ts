@@ -5,6 +5,7 @@
 import type { z } from "zod";
 
 import type { components } from "./api-types";
+import type { DashboardSchema } from "./dashboard-schemas";
 import type {
   CaptureOutSchema,
   LastSyncSchema,
@@ -22,4 +23,5 @@ export const contractChecks: [
   Same<z.infer<typeof TransactionListSchema>, Api["TransactionListOut"]>,
   Same<z.infer<typeof PayOrderOutSchema>, Api["PayOrderOut"]>,
   Same<z.infer<typeof CaptureOutSchema>, Api["CaptureOut"]>,
-] = [true, true, true, true, true];
+  Same<z.infer<typeof DashboardSchema>, Api["DashboardOut"]>,
+] = [true, true, true, true, true, true];

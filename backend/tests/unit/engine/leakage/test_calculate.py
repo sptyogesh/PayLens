@@ -124,8 +124,11 @@ def test_l10_total_equals_ideal_minus_received(
     fee = (gross * fee_share / 100).quantize(D("0.01"), rounding="ROUND_DOWN")
     paypal = max(mid * (1 - D(spread) / 10_000), D("0.000001"))
     result = leak(str(gross), str(fee), str(mid), str(paypal))
-    difference = result.total_leakage_inr - (result.ideal_inr - result.inr_received)
-    assert abs(difference) <= D("0.01")
+    assert result.total_leakage_inr == result.ideal_inr - result.inr_received
+    assert result.total_leakage_inr == result.fee_loss_inr + result.fx_loss_inr
+    net = gross - fee
+    assert abs(result.inr_received - net * paypal) <= D("0.015")
+    assert abs(result.total_leakage_inr - (fee * mid + net * (mid - paypal))) <= D("0.01")
 
 
 def test_inr_payments_have_no_spread() -> None:

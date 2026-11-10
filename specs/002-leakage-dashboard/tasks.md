@@ -64,14 +64,14 @@ branches; each story ends with **Request commit approval** (Principle XIX).
 
 **Independent Test**: seed → `/` shows five ₹ cards for "Last 3 months"; switching period changes them; values equal API totals.
 
-- [ ] T019 [P] [US2] Engine `backend/app/engine/leakage/aggregate.py`: `LeakageRow`, `LeakageTotals`, `totals(rows)`, `by_month(rows)`, `by_client(rows)` (sorting per contract); tests L11, L12 in `backend/tests/unit/engine/leakage/test_aggregate.py`
-- [ ] T020 [P] [US2] `backend/app/services/periods.py`: `DashboardPeriod` enum (`this_month`, `last_3_months`, `all_time`), labels, `resolve(period, now)` in IST; freezegun tests in `backend/tests/unit/services/test_periods.py`
-- [ ] T021 [US2] `backend/app/services/dashboard_service.py` + `backend/app/schemas/dashboard.py` + `backend/app/api/routes/dashboard.py` (`GET /dashboard?period=`): totals, excluded_count, sources, spread; empty → `totals: null`; tests A2 in `backend/tests/integration/api/test_dashboard_api.py`
-- [ ] T022 [P] [US2] Shared UI `frontend/components/ui/StatCard/` (title, value node, hint; U5) and `frontend/components/ui/SegmentedControl/` (radio group, keyboard accessible); tests beside each
-- [ ] T023 [US2] Regenerate API types; zod `dashboardSchema`; `DASHBOARD_TEXT`, `PERIOD_OPTIONS`, `ROUTES.dashboard`, nav item "Dashboard" in `frontend/lib/constants.ts`
-- [ ] T024 [US2] `frontend/features/dashboard/{index.ts,DashboardView.tsx,useDashboard.ts,PeriodFilter.tsx,LeakageSummary/}` + `frontend/app/page.tsx`; empty state, excluded note, sources line, Simulated notice; tests beside each file (MSW)
-- [ ] T025 [US2] Playwright `frontend/e2e/dashboard.spec.ts`: E1 cards show ₹ and no console errors, period switch, E11 (390 px), E12 axe on dashboard
-- [ ] T026 [US2] Verification run: `npm run check:all`
+- [X] T019 [P] [US2] Engine `backend/app/engine/leakage/aggregate.py`: `LeakageRow`, `LeakageTotals`, `totals(rows)`, `by_month(rows)`, `by_client(rows)` (sorting per contract); tests L11, L12 in `backend/tests/unit/engine/leakage/test_aggregate.py`
+- [X] T020 [P] [US2] `backend/app/services/periods.py`: `DashboardPeriod` enum (`this_month`, `last_3_months`, `all_time`), labels, `resolve(period, now)` in IST; freezegun tests in `backend/tests/unit/services/test_periods.py`
+- [X] T021 [US2] `backend/app/services/dashboard_service.py` + `backend/app/schemas/dashboard.py` + `backend/app/api/routes/dashboard.py` (`GET /dashboard?period=`): totals, excluded_count, sources, spread; empty → `totals: null`; tests A2 in `backend/tests/integration/api/test_dashboard_api.py`
+- [X] T022 [P] [US2] Shared UI `frontend/components/ui/StatCard/` (title, value node, hint; U5) and `frontend/components/ui/SegmentedControl/` (radio group, keyboard accessible); tests beside each
+- [X] T023 [US2] Regenerate API types; zod `dashboardSchema`; `DASHBOARD_TEXT`, `PERIOD_OPTIONS`, `ROUTES.dashboard`, nav item "Dashboard" in `frontend/lib/constants.ts`
+- [X] T024 [US2] `frontend/features/dashboard/{index.ts,DashboardView.tsx,useDashboard.ts,PeriodFilter.tsx,LeakageSummary/}` + `frontend/app/page.tsx`; empty state, excluded note, sources line, Simulated notice; tests beside each file (MSW)
+- [X] T025 [US2] Playwright `frontend/e2e/dashboard.spec.ts`: E1 cards show ₹ and no console errors, period switch, E11 (390 px), E12 axe on dashboard
+- [X] T026 [US2] Verification run: `npm run check:all`
 - [ ] T027 [US2] Request commit approval: `feat(dashboard): add leakage summary cards with period filter`
 
 ---
@@ -91,6 +91,8 @@ branches; each story ends with **Request commit approval** (Principle XIX).
 ---
 
 ## Phase 6: User Story 4 — Deployable on Render (P2, polish)
+
+> **Owner decision 2026-11-10**: render.yaml moves to the Phase 1A hardening pass (created, not deployed); README deploy steps and the deployment itself happen after the owner's manual testing. T033, T034, T037, T038 are deferred; T035 (CHANGELOG) is done per story.
 
 - [ ] T033 [US4] `render.yaml`: database `paylens-db` (`postgresMajorVersion: "18"`, plan free), `paylens-api` (runtime python, rootDir backend, `uv sync --frozen --no-dev`, uvicorn start, `healthCheckPath: /health`, envVars incl. `DATABASE_URL` fromDatabase, secrets `sync: false`), `paylens-web` (runtime node, rootDir frontend, `npm ci && npm run build`, `npm start`); `autoDeployTrigger: checksPass`; a pytest that parses render.yaml and checks every Settings field without a default and every `NEXT_PUBLIC_*` used by the frontend is declared, in `backend/tests/unit/test_render_blueprint.py`
 - [ ] T034 [US4] README: "Deploy on Render" steps + environment variable table (backend and frontend; secret / where from); free-tier notes (15-min spin-down, 30-day DB expiry); FX reference-rate and "Simulated (sandbox)" notes

@@ -33,11 +33,6 @@ class RecalcSummary:
     invalid: int = 0
 
 
-def clear_leakage(row: Transaction) -> None:
-    row.mid_market_rate = row.paypal_rate = None
-    row.inr_received = row.fee_loss_inr = row.fx_loss_inr = row.total_leakage_inr = None
-
-
 def store_leakage(row: Transaction, data: LeakageInput, result: LeakageResult) -> None:
     row.mid_market_rate, row.paypal_rate = data.mid_rate, data.paypal_rate
     row.inr_received, row.fee_loss_inr = result.inr_received, result.fee_loss_inr
@@ -47,7 +42,7 @@ def store_leakage(row: Transaction, data: LeakageInput, result: LeakageResult) -
 def apply_leakage(row: Transaction, rates: RateLookup, summary: RecalcSummary) -> None:
     mid = rates.mid_rate(row.currency, ist_date(row.occurred_at))
     paypal = paypal_rate_for(row.currency, mid) if mid is not None else None
-    clear_leakage(row)
+    row.clear_leakage()
     try:
         data = LeakageInput(
             gross=row.gross_amount,
@@ -73,7 +68,7 @@ def recalculate_leakage(session: Session, fx: FxGateway) -> RecalcSummary:
         if is_eligible(row.kind, row.status):
             apply_leakage(row, rates, summary)
         elif row.total_leakage_inr is not None or row.mid_market_rate is not None:
-            clear_leakage(row)
+            row.clear_leakage()
     session.flush()
     return summary
 

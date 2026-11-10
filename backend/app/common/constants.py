@@ -84,3 +84,5 @@ FX_SOURCE_NAME: Final = "frankfurter_ecb"
 FX_FAKE_SOURCE_NAME: Final = "fake"
 FX_TIMEOUT_S: Final = 5.0
 INR_RATE: Final = Decimal("1.000000")
+MONTH_KEY_FORMAT: Final = "%Y-%m"  # "2026-11"
+MONTH_LABEL_FORMAT: Final = "%b %Y"  # "Nov 2026"

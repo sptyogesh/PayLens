@@ -46,7 +46,9 @@ def upsert_client(session: Session, payer: PayerData, currency: str) -> Client:
 
 
 def apply(row: Transaction, dto: TransactionUpsert, client: Client) -> None:
-    """Copy PayPal-derived fields only. Never touches the 002/004 leakage and FIRA columns."""
+    """Copy PayPal-derived fields. Leakage is cleared when its inputs change (002 FR-020);
+    FIRA columns are never touched."""
+    before = row.leakage_inputs()
     row.client_id = client.id
     row.occurred_at = dto.occurred_at
     row.event_code = dto.event_code or row.event_code
@@ -63,6 +65,8 @@ def apply(row: Transaction, dto: TransactionUpsert, client: Client) -> None:
     row.paypal_order_id = dto.paypal_order_id or row.paypal_order_id
     if row.origin is not TransactionOrigin.TRANSACTION_SEARCH:
         row.origin = dto.origin
+    if row.leakage_inputs() != before:
+        row.clear_leakage()
 
 
 def upsert_transaction(session: Session, dto: TransactionUpsert) -> UpsertResult:
