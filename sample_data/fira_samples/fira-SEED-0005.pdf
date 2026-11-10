@@ -1,0 +1,88 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (anonymous) /CreationDate (D:20000101000000+00'00') /Creator (anonymous) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (PAYLENS-FAKE-FIRA:{"currency": "USD", "foreign_amount": "450.00", "inr_amount": "37800.00", "purpose_code": "P0802", "rate": "84.000000", "reference_no": "SEED-0005", "remittance_date": "2026-10-22", "remitter": "PayPal \(demo\)"}) /Title (Foreign Inward Remittance Advice \(FIRA\)) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 709
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 16 Tf 19.2 TL ET
+BT 1 0 0 1 72 770 Tm (Foreign Inward Remittance Advice \(FIRA\)) Tj T* ET
+BT /F1 11 Tf 13.2 TL ET
+BT 1 0 0 1 72 730 Tm (DEMO SAMPLE \227 not a real bank document) Tj T* ET
+BT 1 0 0 1 72 710 Tm (Foreign amount: 450.00) Tj T* ET
+BT 1 0 0 1 72 690 Tm (Currency: USD) Tj T* ET
+BT 1 0 0 1 72 670 Tm (INR amount credited: 37800.00) Tj T* ET
+BT 1 0 0 1 72 650 Tm (Exchange rate \(INR per unit\): 84.000000) Tj T* ET
+BT 1 0 0 1 72 630 Tm (Remittance date: 2026-10-22) Tj T* ET
+BT 1 0 0 1 72 610 Tm (Remittance reference: SEED-0005) Tj T* ET
+BT 1 0 0 1 72 590 Tm (Remitter: PayPal \(demo\)) Tj T* ET
+BT 1 0 0 1 72 570 Tm (Purpose code: P0802) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000524 00000 n 
+0000000592 00000 n 
+0000001105 00000 n 
+0000001164 00000 n 
+trailer
+<<
+/ID 
+[<77ee19b0ae2d7d94072172fc6cadb8f3><77ee19b0ae2d7d94072172fc6cadb8f3>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+1923
+%%EOF
