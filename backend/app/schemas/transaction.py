@@ -1,13 +1,12 @@
 """API models for GET /transactions. raw_json, flag_reason and origin are never exposed."""
 
 import uuid
-from datetime import datetime
 
 from pydantic import BaseModel
 
 from app.common.types import TransactionKind, TransactionSource, TransactionStatus
 from app.models import Transaction
-from app.schemas.common import MoneyOut
+from app.schemas.common import MoneyOut, UtcDatetime
 
 
 class ClientRef(BaseModel):
@@ -19,7 +18,7 @@ class ClientRef(BaseModel):
 class TransactionOut(BaseModel):
     id: uuid.UUID
     paypal_transaction_id: str
-    occurred_at: datetime
+    occurred_at: UtcDatetime
     client: ClientRef
     kind: TransactionKind
     status: TransactionStatus

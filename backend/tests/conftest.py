@@ -37,7 +37,12 @@ os.environ["DATABASE_URL"] = TEST_DATABASE_URL or "postgresql+psycopg://localhos
 os.environ["FRONTEND_URL"] = "http://frontend.test"
 
 from app.api.deps import reset_limiters  # noqa: E402
-from app.config import get_settings  # noqa: E402
+from app.config import Settings, get_settings  # noqa: E402
+
+# Tests never read backend/.env, so real sandbox credentials can't leak into a test run.
+Settings.model_config["env_file"] = None
+for key in ("PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET"):
+    os.environ.pop(key, None)
 from app.models import Base  # noqa: E402
 
 
