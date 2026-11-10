@@ -1,4 +1,5 @@
-npm run typecheck --prefix frontend
-npm run test --prefix frontend
-uv run --directory backend mypy app scripts tests
+# Editors launched from the desktop do not load the shell profile; uv lives in ~/.local/bin.
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+npm run typecheck
+npm run test:unit
 uv run --directory backend pytest -m "not slow" -q

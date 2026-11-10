@@ -6,12 +6,27 @@ TEST_DATABASE_URL and FAIL (never skip) when it is missing (research R11).
 
 import os
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
-TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "")
+ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
+
+
+def read_env_file_value(name: str) -> str:
+    """Read one KEY=value from backend/.env (gitignored), for hooks run outside a shell."""
+    if not ENV_FILE.is_file():
+        return ""
+    for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
+        key, _, value = line.partition("=")
+        if key.strip() == name:
+            return value.strip().strip('"')
+    return ""
+
+
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL") or read_env_file_value("TEST_DATABASE_URL")
 MISSING_DB_MESSAGE = "Set TEST_DATABASE_URL to a PostgreSQL 18 database (see quickstart)."
 
 # Test-mode settings for every test. Real PayPal is never reachable from tests.

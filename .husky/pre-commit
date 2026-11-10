@@ -1,1 +1,3 @@
+# Editors launched from the desktop do not load the shell profile; uv lives in ~/.local/bin.
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 npx lint-staged
