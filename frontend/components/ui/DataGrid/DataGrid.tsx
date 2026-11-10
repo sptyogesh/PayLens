@@ -38,6 +38,8 @@ export function DataGrid<T>({
         rowData={rows}
         columnDefs={columns}
         defaultColDef={DEFAULT_COL_DEF as ColDef<T>}
+        suppressRowVirtualisation
+        suppressColumnVirtualisation
         {...(getRowId ? { getRowId: ({ data }: { data: T }) => getRowId(data) } : {})}
       />
     </div>

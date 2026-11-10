@@ -48,3 +48,32 @@ export const MESSAGES = {
   networkError: "Cannot reach the PayLens server. Check that it is running.",
   retry: "Try again",
 } as const;
+
+export const SYNC_TEXT = {
+  button: "Sync now",
+  running: "Syncing with PayPal sandbox…",
+  neverRun: "No sync has run yet. Press Sync now to fetch your PayPal sandbox payments.",
+  outcome: {
+    running: "Sync running",
+    success: "Sync finished",
+    partial: "Sync partly finished",
+    failed: "Sync failed",
+  },
+  trigger: { manual: "manual", startup: "on startup" },
+} as const;
+
+export const TRANSACTIONS_TEXT = {
+  title: "Transactions",
+  gridLabel: "Transactions",
+  emptyTitle: "No transactions yet",
+  emptyMessage: "Press Sync now to fetch payments from the PayPal sandbox.",
+  flagged: "Check",
+  flaggedHint: "PayPal data for this payment looked unusual. It is stored as received.",
+} as const;
+
+export const TRANSACTION_STATUS_LABELS = {
+  completed: "Completed",
+  pending: "Pending",
+  denied: "Denied",
+  reversed: "Reversed",
+} as const;

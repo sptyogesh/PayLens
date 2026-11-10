@@ -6,17 +6,21 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.deps import get_gateway
 from app.api.routes import ROUTERS
 from app.common.constants import LOCAL_FRONTEND_ORIGIN
 from app.common.errors import register_error_handlers
 from app.config import get_settings
-from app.db import get_engine
+from app.db import get_engine, get_session_factory
 from app.models import Base
+from app.services.sync_service import start_startup_sync_thread
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     Base.metadata.create_all(get_engine())
+    if get_settings().startup_sync_enabled:
+        start_startup_sync_thread(get_session_factory(), get_engine(), get_gateway())
     yield
 
 

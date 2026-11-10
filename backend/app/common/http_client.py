@@ -34,7 +34,7 @@ def backoff_delay(attempt: int) -> float:
 
 
 def send_with_retry(
-    send: Callable[[], httpx.Response], sleep: Sleep = time.sleep
+    send: Callable[[], httpx.Response], sleep: Sleep | None = None
 ) -> httpx.Response:
     """Call `send`, retrying 429/5xx and network errors up to HTTP_MAX_RETRIES times."""
     for attempt in range(HTTP_MAX_RETRIES + 1):
@@ -49,5 +49,5 @@ def send_with_retry(
                 return response
             logger.warning("HTTP %d (attempt %d)", response.status_code, attempt + 1)
         if attempt < HTTP_MAX_RETRIES:
-            sleep(backoff_delay(attempt))
+            (sleep or time.sleep)(backoff_delay(attempt))
     raise PayPalError(UNAVAILABLE_MESSAGE, code="PAYPAL_UNAVAILABLE")

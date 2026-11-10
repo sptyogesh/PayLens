@@ -1,4 +1,11 @@
-import { absoluteAmount, formatDate, formatINR, formatMoney, isNegativeAmount } from "./format";
+import {
+  absoluteAmount,
+  compareAmounts,
+  formatDate,
+  formatINR,
+  formatMoney,
+  isNegativeAmount,
+} from "./format";
 
 describe("formatINR", () => {
   it("U1 formats rupees with en-IN grouping", () => {
@@ -39,5 +46,21 @@ describe("amount sign helpers", () => {
 describe("formatDate", () => {
   it("shows UTC times in IST", () => {
     expect(formatDate("2026-11-10T06:30:00Z")).toContain("12:00");
+  });
+});
+
+describe("compareAmounts", () => {
+  it("orders money strings exactly without floats", () => {
+    const values = ["10.00", "-2.50", "9.99", "100.00", "0.10", "9007199254740993.01"];
+    expect([...values].sort(compareAmounts)).toEqual([
+      "-2.50",
+      "0.10",
+      "9.99",
+      "10.00",
+      "100.00",
+      "9007199254740993.01",
+    ]);
+    expect(compareAmounts("9007199254740993.01", "9007199254740993.00")).toBe(1);
+    expect(compareAmounts("5.00", "5.00")).toBe(0);
   });
 });

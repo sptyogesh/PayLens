@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 
@@ -61,13 +61,18 @@ def db_engine() -> Iterator[Engine]:
 
 
 @pytest.fixture
-def db_session(db_engine: Engine) -> Iterator[Session]:
-    """A session inside a transaction that is rolled back after the test."""
+def session_factory(db_engine: Engine) -> Iterator[sessionmaker[Session]]:
+    """Sessions whose commits become savepoints; everything is rolled back after the test."""
     with db_engine.connect() as connection:
         transaction = connection.begin()
-        session = Session(bind=connection, join_transaction_mode="create_savepoint")
-        try:
-            yield session
-        finally:
-            session.close()
-            transaction.rollback()
+        yield sessionmaker(
+            bind=connection, join_transaction_mode="create_savepoint", expire_on_commit=False
+        )
+        transaction.rollback()
+
+
+@pytest.fixture
+def db_session(session_factory: sessionmaker[Session]) -> Iterator[Session]:
+    """A session inside a transaction that is rolled back after the test."""
+    with session_factory() as session:
+        yield session
