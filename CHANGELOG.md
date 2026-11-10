@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `frontend/.gitignore` ignores the `AGENTS.md` that `next dev` writes into `frontend/`
 - Backend constants split into `app/common/constants/` (core, leakage, chat, fira, report) behind the same import path; one `SIMULATED_LABEL`; LLM adapter selection moved to `api/deps.py` (removes an import cycle); package-entry imports; ReportLab type stubs handled by a mypy override (Phase 1A hardening)
 - Backend: `answer_question` takes the validated `ChatIn` (5 parameters max); sync, checkout, pay and FIRA service code imports through the `app.paypal` and `app.engine.fira_match` package entries
 - `.gitignore`: anchor Python `lib/` rules to the repo root so `frontend/lib/` is tracked; add Node/Next.js patterns
