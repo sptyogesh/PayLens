@@ -1,0 +1,9 @@
+---
+description: PayLens project rules (constitution + AGENTS.md)
+alwaysApply: true
+---
+
+Follow `AGENTS.md` at the repo root and `.specify/memory/constitution.md` for every task.
+The constitution always wins. Current scope is `docs/PayLens_Phase1A_Hackathon_Plan.md`.
+After implementation, run `npm run check:all`; fix and re-run until everything passes.
+Never run git add/commit/push/merge or touch GitHub Actions without the owner's explicit approval for that exact action.
