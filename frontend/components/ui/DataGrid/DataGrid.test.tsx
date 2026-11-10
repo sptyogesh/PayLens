@@ -32,4 +32,19 @@ describe("DataGrid", () => {
     );
     expect(screen.getByRole("region", { name: "Transactions" })).toBeInTheDocument();
   });
+
+  it("grows with its rows when autoHeight is set", () => {
+    render(
+      <DataGrid<Row>
+        rows={[{ id: "1", name: "A" }]}
+        columns={[{ field: "name" }]}
+        label="Small table"
+        emptyTitle="Empty"
+        autoHeight
+      />,
+    );
+    expect(screen.getByRole("region", { name: "Small table" })).not.toHaveStyle({
+      height: "480px",
+    });
+  });
 });

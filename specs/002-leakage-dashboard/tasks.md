@@ -54,7 +54,7 @@ branches; each story ends with **Request commit approval** (Principle XIX).
 - [X] T015 [US1] Grid columns split: `frontend/features/transactions/columns/{index.ts,baseColumns.tsx,leakageColumns.tsx}`; leakage columns: Mid-market rate, PayPal rate "Simulated (sandbox)", INR received, Fee loss, FX loss (`gainWhenNegative`), Total leakage, Leakage %; INR received and FX loss headers also carry "Simulated (sandbox)" (FR-004); "Rate unavailable"/"Not calculated" text; exact sort via `compareAmounts`; tests in `TransactionsGrid.test.tsx`
 - [X] T016 [US1] Playwright: `FX_MODE=fake` in `frontend/playwright.config.ts`; `frontend/e2e/transactions.spec.ts` — seeded rows show leakage, "Simulated (sandbox)" visible (E4), sort by total leakage (E3)
 - [X] T017 [US1] Verification run: `npm run check:all` → fix → re-run (stop after 3 failed attempts on one issue); add the story's CHANGELOG entry
-- [ ] T018 [US1] Request commit approval: `feat(leakage): calculate per-payment fee and FX loss in INR`
+- [X] T018 *(committed by the owner as 0a3c8df)* [US1] Request commit approval: `feat(leakage): calculate per-payment fee and FX loss in INR`
 
 ---
 
@@ -72,7 +72,7 @@ branches; each story ends with **Request commit approval** (Principle XIX).
 - [X] T024 [US2] `frontend/features/dashboard/{index.ts,DashboardView.tsx,useDashboard.ts,PeriodFilter.tsx,LeakageSummary/}` + `frontend/app/page.tsx`; empty state, excluded note, sources line, Simulated notice; tests beside each file (MSW)
 - [X] T025 [US2] Playwright `frontend/e2e/dashboard.spec.ts`: E1 cards show ₹ and no console errors, period switch, E11 (390 px), E12 axe on dashboard
 - [X] T026 [US2] Verification run: `npm run check:all`
-- [ ] T027 [US2] Request commit approval: `feat(dashboard): add leakage summary cards with period filter`
+- [X] T027 [US2] Request commit approval: `feat(dashboard): add leakage summary cards with period filter`
 
 ---
 
@@ -82,11 +82,11 @@ branches; each story ends with **Request commit approval** (Principle XIX).
 
 **Independent Test**: seed → "All time" → month and client tables sum to the cards.
 
-- [ ] T028 [US3] `by_month`/`by_client` in `GET /dashboard` response (`BreakdownRowOut`); test that Σ rows = totals in `test_dashboard_api.py`
-- [ ] T029 [US3] `frontend/features/dashboard/Breakdown/{index.ts,BreakdownTables.tsx,breakdownColumns.tsx}` using `DataGrid`; tests beside
-- [ ] T030 [US3] Playwright: month and client tables visible with rows in `frontend/e2e/dashboard.spec.ts`
-- [ ] T031 [US3] Verification run: `npm run check:all`
-- [ ] T032 [US3] Request commit approval: `feat(dashboard): add leakage breakdown by month and client`
+- [X] T028 [US3] `by_month`/`by_client` in `GET /dashboard` response (`BreakdownRowOut`); test that Σ rows = totals in `test_dashboard_api.py`
+- [X] T029 [US3] `frontend/features/dashboard/Breakdown/{index.ts,BreakdownTables.tsx,breakdownColumns.tsx}` using `DataGrid`; tests beside
+- [X] T030 [US3] Playwright: month and client tables visible with rows in `frontend/e2e/dashboard.spec.ts`
+- [X] T031 [US3] Verification run: `npm run check:all`
+- [X] T032 *(owner: no commits during the continuous run; proposed in the final report)* [US3] Request commit approval: `feat(dashboard): add leakage breakdown by month and client`
 
 ---
 
@@ -94,12 +94,12 @@ branches; each story ends with **Request commit approval** (Principle XIX).
 
 > **Owner decision 2026-11-10**: render.yaml moves to the Phase 1A hardening pass (created, not deployed); README deploy steps and the deployment itself happen after the owner's manual testing. T033, T034, T037, T038 are deferred; T035 (CHANGELOG) is done per story.
 
-- [ ] T033 [US4] `render.yaml`: database `paylens-db` (`postgresMajorVersion: "18"`, plan free), `paylens-api` (runtime python, rootDir backend, `uv sync --frozen --no-dev`, uvicorn start, `healthCheckPath: /health`, envVars incl. `DATABASE_URL` fromDatabase, secrets `sync: false`), `paylens-web` (runtime node, rootDir frontend, `npm ci && npm run build`, `npm start`); `autoDeployTrigger: checksPass`; a pytest that parses render.yaml and checks every Settings field without a default and every `NEXT_PUBLIC_*` used by the frontend is declared, in `backend/tests/unit/test_render_blueprint.py`
-- [ ] T034 [US4] README: "Deploy on Render" steps + environment variable table (backend and frontend; secret / where from); free-tier notes (15-min spin-down, 30-day DB expiry); FX reference-rate and "Simulated (sandbox)" notes
-- [ ] T035 Update `CHANGELOG.md` under `[Unreleased]` for 002
-- [ ] T036 [US4] Verification run: `npm run check:all`
-- [ ] T037 [US4] Request commit approval: `chore(deploy): add Render blueprint and deployment guide`
-- [ ] T038 Owner deploys on Render (quickstart V5) and confirms the live URL; then run the live smoke test (001 T075 + dashboard)
+- [X] T033 *(done in the Phase 1A hardening pass: render.yaml + backend/tests/unit/test_render_blueprint.py; not deployed)* [US4] `render.yaml`: database `paylens-db` (`postgresMajorVersion: "18"`, plan free), `paylens-api` (runtime python, rootDir backend, `uv sync --frozen --no-dev`, uvicorn start, `healthCheckPath: /health`, envVars incl. `DATABASE_URL` fromDatabase, secrets `sync: false`), `paylens-web` (runtime node, rootDir frontend, `npm ci && npm run build`, `npm start`); `autoDeployTrigger: checksPass`; a pytest that parses render.yaml and checks every Settings field without a default and every `NEXT_PUBLIC_*` used by the frontend is declared, in `backend/tests/unit/test_render_blueprint.py`
+- [ ] T034 *(deferred by owner: README after manual testing)* [US4] README: "Deploy on Render" steps + environment variable table (backend and frontend; secret / where from); free-tier notes (15-min spin-down, 30-day DB expiry); FX reference-rate and "Simulated (sandbox)" notes
+- [X] T035 Update `CHANGELOG.md` under `[Unreleased]` for 002
+- [X] T036 *(covered by the US3 verification run)* [US4] Verification run: `npm run check:all`
+- [ ] T037 *(deferred by owner)* [US4] Request commit approval: `chore(deploy): add Render blueprint and deployment guide`
+- [ ] T038 *(deferred by owner: deploy after manual testing)* Owner deploys on Render (quickstart V5) and confirms the live URL; then run the live smoke test (001 T075 + dashboard)
 
 ---
 
