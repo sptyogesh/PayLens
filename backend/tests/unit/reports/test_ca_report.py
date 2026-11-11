@@ -31,8 +31,8 @@ def test_every_value_both_ways_and_labels() -> None:
     assert numbers_not_in_data(data, text) == []
     assert REPORT_TITLE in text and "Period: This month (1 Nov 2026 – 10 Nov 2026)" in text
     assert "Generated 10 Nov 2026, 11:30 IST" in text
-    assert "INR 1,68,000.00" in text and "USD 2,000.00" in text
-    assert "FX loss (Simulated (sandbox)) INR 5,040.00" in text
+    assert "₹1,68,000.00" in text and "USD 2,000.00" in text
+    assert "FX loss (Simulated (sandbox)) ₹5,040.00" in text
     assert "Payments missing a FIRA 1" in text and "4 Nov 2026 Ava Stone TX-2" in text
     assert f"{REPORT_SUMMARY_CODE_HEADING} Summary text." in text
 
@@ -49,7 +49,7 @@ def test_disclaimer_is_in_the_body_and_on_every_page() -> None:
 def test_fx_gain_is_shown_as_gain() -> None:
     data = report(totals=totals(fx="-120.50"), by_month=[row("2026-11", "Nov 2026", fx="-120.50")])
     text = pdf_text(render_pdf(data))
-    assert "FX gain (Simulated (sandbox)) INR 120.50" in text
+    assert "FX gain (Simulated (sandbox)) ₹120.50" in text
     assert "120.50 gain" in text and "-120.50" not in text
     assert numbers_not_in_data(data, text) == []
 
@@ -64,7 +64,7 @@ def test_long_client_names_wrap_and_markup_is_escaped() -> None:
 def test_ai_summary_heading() -> None:
     summary = "For This month, income was ₹1,68,000.00."
     text = pdf_text(render_pdf(report(source="ai", text=summary)))
-    assert f"{REPORT_SUMMARY_AI_HEADING} For This month, income was INR 1,68,000.00." in text
+    assert f"{REPORT_SUMMARY_AI_HEADING} For This month, income was ₹1,68,000.00." in text
 
 
 def test_empty_period_has_no_tables() -> None:
@@ -77,3 +77,11 @@ def test_empty_period_has_no_tables() -> None:
     assert "By month" not in text and "By client" not in text and "INR" not in text
     assert NOT_TAX_ADVICE in text and "Sandbox data." in text
     assert numbers_not_in_data(data, text) == []
+
+
+def test_rupee_font_is_embedded_with_its_license() -> None:
+    from app.reports.rupee_font import RUPEE_FONT_FILE  # noqa: PLC0415 - local to this check
+
+    pdf = render_pdf(report())
+    assert b"/BaseFont /AAAAAA+NotoSans" in pdf or b"NotoSans" in pdf
+    assert (RUPEE_FONT_FILE.parent / "OFL.txt").read_text().count("SIL Open Font License") >= 1

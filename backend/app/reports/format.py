@@ -1,27 +1,30 @@
 """Display strings for the CA report. Values are copied from ReportData strings; no arithmetic.
 
-Amounts get thousands commas only (en-IN for INR). A negative FX loss is shown as a gain by
-dropping its minus sign and labelling it "gain".
+Amounts get thousands commas only (en-IN for INR) and INR amounts start with "₹" (drawn with the
+embedded rupee font). A negative FX loss is shown as a gain by dropping its minus sign and
+labelling it "gain".
 """
 
 from typing import Final
 from xml.sax.saxutils import escape
 
+from app.common.constants import INR
 from app.common.money import display_money, group_digits
+from app.reports.rupee_font import RUPEE, RUPEE_MARKUP
 from app.schemas.common import MoneyOut
 
 MINUS: Final = "-"
 GAIN: Final = "gain"
 NO_PERCENT: Final = "n/a"
-RUPEE: Final = "₹"
-RUPEE_TEXT: Final = "INR "  # the built-in PDF fonts have no ₹ glyph
 
 
 PDF_TEXT_ENCODING: Final = "cp1252"  # what the built-in Helvetica fonts can draw
 
 
 def money(value: MoneyOut) -> str:
-    """'INR 1,23,456.78'."""
+    """'₹1,23,456.78' (paragraph markup) for INR; 'USD 7,080.00' for other currencies."""
+    if value.currency == INR:
+        return RUPEE_MARKUP + group_digits(value.amount, value.currency)
     return display_money(value.amount, value.currency)
 
 
@@ -48,16 +51,19 @@ def percent(value: str | None) -> str:
 
 
 def text(value: str) -> str:
-    """Escape user data (client names, AI text) for ReportLab's paragraph markup; "₹" is
-    written "INR " because the built-in fonts cannot draw it."""
-    printable = value.replace(RUPEE, RUPEE_TEXT).encode(PDF_TEXT_ENCODING, errors="replace")
-    return escape(printable.decode(PDF_TEXT_ENCODING))
+    """Escape user data (client names, AI text) for ReportLab's paragraph markup. "₹" is drawn
+    with the rupee font; other characters Helvetica cannot draw become "?"."""
+    parts = [
+        escape(part.encode(PDF_TEXT_ENCODING, errors="replace").decode(PDF_TEXT_ENCODING))
+        for part in value.split(RUPEE)
+    ]
+    return RUPEE_MARKUP.join(parts)
 
 
 def is_printable(value: str) -> bool:
     """False when the built-in PDF fonts cannot show a character (it would print as "?")."""
     try:
-        value.replace(RUPEE, RUPEE_TEXT).encode(PDF_TEXT_ENCODING)
+        value.replace(RUPEE, "").encode(PDF_TEXT_ENCODING)
     except UnicodeEncodeError:
         return False
     return True

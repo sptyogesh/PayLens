@@ -40,15 +40,16 @@ export function formatInr(amount: string): string {
 }
 
 /**
- * The CA report PDF's INR format: "INR 1,23,456.78" (en-IN grouping, two decimals; the built-in
- * PDF fonts have no ₹ glyph).
+ * How an INR amount appears in the raw CA report PDF: "₹" comes from the embedded rupee font, then
+ * the en-IN grouped digits are their own string, e.g. "(1,23,456.78)".
  */
 export function formatReportInr(amount: string): string {
   const grouped = new Intl.NumberFormat("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount as Intl.StringNumericLiteral);
-  return `INR ${grouped}`;
+  // The PDF draws "₹" with the embedded rupee font, then the digits as their own text string.
+  return `(${grouped})`;
 }
 
 /** Undo PDF string escaping of "(" and ")" so report text can be searched as written. */

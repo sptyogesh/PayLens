@@ -1,7 +1,7 @@
 """Page, text and table styles for the CA report PDF (ReportLab built-in Helvetica, A4).
 
 The built-in fonts keep text readable in the uncompressed PDF (tests read it without a parser).
-They have no ₹ glyph, so amounts are written "INR 1,23,456.78".
+The ₹ sign alone comes from the embedded Noto Sans (rupee_font.py).
 """
 
 from typing import Any, Final

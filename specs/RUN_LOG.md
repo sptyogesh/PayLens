@@ -77,7 +77,7 @@ All work is on branch `001-paypal-sync`, uncommitted unless noted.
   PDF text reader for tests, both-direction number check); frontend subagent (`apiGetBlob`,
   `downloadBlob`, "Download CA report" button, E9). Main agent: integration, E2E amount check,
   CHANGELOG, `render.yaml` + blueprint test.
-- Notes: the built-in PDF fonts have no ₹ glyph, so amounts read `INR 1,23,456.78` (en-IN commas).
+- Notes: amounts read `₹1,23,456.78`; the ₹ glyph comes from an embedded Noto Sans (OFL) font (hardening fix 3; earlier `INR 1,23,456.78`).
 - Review fixes (code-reviewer): report timestamps (`generated_at`, `start`, `end`) no longer ground
   numbers (only their years) — invented summary figures could pass; "lakh/crore/k/rupees/Rs" make a
   number an amount; currency-code prefix made case-sensitive (it matched ordinary words); names the PDF
