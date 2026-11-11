@@ -56,8 +56,18 @@ jobs:
           npm ci --prefix frontend
           uv sync --directory backend --locked
 
+      # Up to 3 attempts: the runner's Ubuntu mirrors sometimes fail to resolve for a few minutes
+      # (seen 2026-11-11: "Temporary failure resolving 'archive.ubuntu.com'"), which is not a
+      # problem in our code. The package lists are refreshed before each retry.
       - name: Install Playwright browser
-        run: npx --prefix frontend playwright install --with-deps chromium
+        run: |
+          for attempt in 1 2 3; do
+            npx --prefix frontend playwright install --with-deps chromium && exit 0
+            echo "Playwright install failed (attempt $attempt of 3); retrying in 30 s"
+            sleep 30
+            sudo apt-get update || true
+          done
+          exit 1
 
       - name: Create e2e database
         env:
