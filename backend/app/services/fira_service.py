@@ -29,6 +29,7 @@ from app.common.constants import (
     FIRA_REASON_MAX,
     FIRA_REFERENCE_MAX,
     FIRA_REMITTER_MAX,
+    LLM_BUSY_CODE,
 )
 from app.common.dates import utc_now
 from app.common.errors import LlmConfigError, LlmUnavailableError
@@ -50,6 +51,7 @@ TOO_LARGE: Final = f"The file is larger than {FIRA_MAX_BYTES // (1024 * 1024)} M
 DUPLICATE: Final = "This FIRA was already uploaded."
 UNREADABLE: Final = "We could not read this FIRA, so nothing was saved. Please check the file."
 AI_DOWN: Final = "The AI reader is not available right now, so nothing was saved. Try again later."
+AI_BUSY: Final = "The AI is busy, try again shortly. Nothing was saved."
 MATCH_PENDING: Final = (
     "Saved. Matching could not run now; it will run again after the next upload or sync."
 )
@@ -161,7 +163,7 @@ def read_and_store(
         return outcome_of(name, "failed", UNREADABLE)
     except (LlmUnavailableError, LlmConfigError) as error:
         logger.warning("FIRA extraction skipped: %s", error.code)
-        return outcome_of(name, "failed", AI_DOWN)
+        return outcome_of(name, "failed", AI_BUSY if error.code == LLM_BUSY_CODE else AI_DOWN)
     document = new_document(name, file_hash, extracted)
     if not store(factory, document):
         return outcome_of(name, "duplicate", DUPLICATE)

@@ -26,6 +26,7 @@ from app.ai.types import ToolInputError, ToolResult
 from app.common.constants import (
     CHAT_DEADLINE_S,
     CHAT_MIN_CALL_S,
+    LLM_BUSY_CODE,
     LLM_MAX_TOOL_ROUNDS,
     LLM_TIMEOUT_S,
     LLM_TOOL_ERROR_MAX,
@@ -73,6 +74,7 @@ def answer_question(
     except LlmUnavailableError as error:
         logger.warning("Chat LLM unavailable: %s", error.code)
         state.llm_failed = True
+        state.llm_busy = error.code == LLM_BUSY_CODE
     out = decide(state, question, today)
     logger.info(
         "Chat answered: outcome=%s stop=%s tools=%s",

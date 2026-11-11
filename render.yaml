@@ -52,12 +52,17 @@ services:
         value: https://api.frankfurter.dev
       - key: LLM_MODE
         value: http
+      # Gemini free tier (owner choice, research R5). Startup is refused if LLM_API_KEY is a key of
+      # another provider. The free tier may use sent content to improve Google's products: sandbox
+      # and sample data only.
+      - key: LLM_PROVIDER
+        value: gemini
       - key: LLM_API_KEY
         sync: false
       - key: LLM_MODEL
-        value: claude-opus-5-5
+        value: gemini-3.6-flash
       - key: LLM_API_URL
-        value: https://api.anthropic.com
+        value: https://generativelanguage.googleapis.com
 
   - type: web
     name: paylens-web

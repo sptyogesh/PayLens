@@ -1,7 +1,9 @@
-"""The single LLM wrapper (Principle IX): Anthropic Messages API over httpx (research R1).
+"""The single LLM wrapper (Principle IX): one request/response shape for every provider.
 
-Provider URL, model and key come from settings. The key is sent only in the request header and
-is never logged. No retry loop: the chat must answer within the timeout (FR-009).
+Requests and responses use the Anthropic Messages block format (research R1). AnthropicLlm sends
+them as they are; GeminiLlm (`gemini.py`) translates them (research R5). Provider, URL, model and
+key come from settings. The key is sent only in a request header and is never logged. No retry
+loop: the chat must answer within the timeout (FR-009). HTTP 429 is "busy" (LLM_BUSY).
 """
 
 import logging
@@ -11,7 +13,7 @@ from typing import Any, Protocol
 import httpx
 from pydantic import BaseModel, Field, ValidationError
 
-from app.common.constants import LLM_API_VERSION, LLM_EFFORT, LLM_MAX_TOKENS
+from app.common.constants import LLM_API_VERSION, LLM_BUSY_CODE, LLM_EFFORT, LLM_MAX_TOKENS
 from app.common.errors import LlmConfigError, LlmUnavailableError
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 MESSAGES_PATH = "/v1/messages"
 UNAVAILABLE_MESSAGE = "The AI service is not available right now."
 CONFIG_MESSAGE = "The AI service rejected the request. Check the LLM settings."
-UNAVAILABLE_STATUSES = frozenset({HTTPStatus.TOO_MANY_REQUESTS})
+BUSY_MESSAGE = "The AI is busy. Try again shortly."
 
 
 class LlmRequest(BaseModel):
@@ -49,7 +51,8 @@ class AnthropicLlm:
         self._model = model
 
     def create(self, request: LlmRequest) -> LlmResponse:
-        response = self._post(self._body(request), request.timeout_s)
+        headers = {"x-api-key": self._api_key, "anthropic-version": LLM_API_VERSION}
+        response = post_json(self._client, MESSAGES_PATH, self._body(request), headers, request)
         check_status(response.status_code)
         try:
             return LlmResponse.model_validate_json(response.content)
@@ -73,26 +76,33 @@ class AnthropicLlm:
         body["output_config"] = output_config
         return body
 
-    def _post(self, body: dict[str, Any], timeout_s: float | None) -> httpx.Response:
-        headers = {
-            "x-api-key": self._api_key,
-            "anthropic-version": LLM_API_VERSION,
-            "content-type": "application/json",
-        }
-        try:
-            if timeout_s is None:
-                return self._client.post(MESSAGES_PATH, json=body, headers=headers)
-            return self._client.post(MESSAGES_PATH, json=body, headers=headers, timeout=timeout_s)
-        except httpx.HTTPError as error:
-            logger.warning("AI service unreachable: %s", type(error).__name__)
-            raise LlmUnavailableError(UNAVAILABLE_MESSAGE) from error
+
+def post_json(
+    client: httpx.Client,
+    path: str,
+    body: dict[str, Any],
+    headers: dict[str, str],
+    request: LlmRequest,
+) -> httpx.Response:
+    """POST `body` as JSON; network errors and timeouts become LlmUnavailableError."""
+    all_headers = {**headers, "content-type": "application/json"}
+    try:
+        if request.timeout_s is None:
+            return client.post(path, json=body, headers=all_headers)
+        return client.post(path, json=body, headers=all_headers, timeout=request.timeout_s)
+    except httpx.HTTPError as error:
+        logger.warning("AI service unreachable: %s", type(error).__name__)
+        raise LlmUnavailableError(UNAVAILABLE_MESSAGE) from error
 
 
 def check_status(status: int) -> None:
-    """429 and 5xx (incl. 529 overloaded) are temporary; other non-200 codes are config errors."""
+    """429 is busy (rate limit or quota); 5xx (incl. 529 overloaded) is temporary; any other
+    non-200 code means the request or settings are wrong (bad key, model, body, no credit)."""
     if status == HTTPStatus.OK:
         return
     logger.warning("AI service returned HTTP %d", status)
-    if status in UNAVAILABLE_STATUSES or status >= HTTPStatus.INTERNAL_SERVER_ERROR:
+    if status == HTTPStatus.TOO_MANY_REQUESTS:
+        raise LlmUnavailableError(BUSY_MESSAGE, code=LLM_BUSY_CODE)
+    if status >= HTTPStatus.INTERNAL_SERVER_ERROR:
         raise LlmUnavailableError(UNAVAILABLE_MESSAGE)
     raise LlmConfigError(CONFIG_MESSAGE)

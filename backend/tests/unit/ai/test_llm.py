@@ -7,9 +7,10 @@ import httpx
 import pytest
 import respx
 
+from app.ai.gemini import GeminiLlm
 from app.ai.llm import AnthropicLlm, LlmRequest
 from app.api.deps import get_llm
-from app.common.constants import LLM_API_VERSION, LLM_EFFORT, LLM_MAX_TOKENS
+from app.common.constants import LLM_API_VERSION, LLM_BUSY_CODE, LLM_EFFORT, LLM_MAX_TOKENS
 from app.common.errors import LlmConfigError, LlmUnavailableError
 from app.fakes.llm_fake import FakeLlm
 
@@ -66,8 +67,9 @@ def test_success_parses_blocks_and_sends_the_contract_body(llm: AnthropicLlm) ->
 @pytest.mark.parametrize("status", [429, 500, 502, 503, 529])
 def test_temporary_statuses_are_unavailable(llm: AnthropicLlm, status: int) -> None:
     respx.post(URL).respond(status, json={"type": "error"})
-    with pytest.raises(LlmUnavailableError):
+    with pytest.raises(LlmUnavailableError) as caught:
         llm.create(REQUEST)
+    assert (caught.value.code == LLM_BUSY_CODE) is (status == 429)
 
 
 @respx.mock
@@ -116,11 +118,23 @@ def test_get_llm_is_the_fake_in_tests() -> None:
     get_llm.cache_clear()
 
 
-def test_get_llm_http_mode_builds_the_real_client(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    ("provider", "key", "client_type"),
+    [
+        ("anthropic", SECRET, AnthropicLlm),
+        ("", "sk-ant-test-1", AnthropicLlm),
+        ("gemini", "gemini-test-key", GeminiLlm),
+        ("", "AQ.test-1", GeminiLlm),
+    ],
+)
+def test_get_llm_http_mode_builds_the_chosen_provider(
+    monkeypatch: pytest.MonkeyPatch, provider: str, key: str, client_type: type
+) -> None:
     monkeypatch.setenv("LLM_MODE", "http")
-    monkeypatch.setenv("LLM_API_KEY", SECRET)
+    monkeypatch.setenv("LLM_PROVIDER", provider)
+    monkeypatch.setenv("LLM_API_KEY", key)
     get_llm.cache_clear()
     try:
-        assert isinstance(get_llm(), AnthropicLlm)
+        assert isinstance(get_llm(), client_type)
     finally:
         get_llm.cache_clear()

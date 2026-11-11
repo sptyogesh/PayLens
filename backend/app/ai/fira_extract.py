@@ -147,8 +147,9 @@ def build_request(pdf_bytes: bytes) -> LlmRequest:
 
 
 def parse_output(content: list[dict[str, Any]]) -> FiraExtraction:
-    text = next((b.get("text") for b in content if b.get("type") == "text"), None)
-    if not isinstance(text, str):
+    texts = [b.get("text") for b in content if b.get("type") == "text"]  # Gemini may split JSON
+    text = "".join(t for t in texts if isinstance(t, str))
+    if not text.strip():
         raise FiraExtractionError(UNREADABLE_MESSAGE)
     try:
         return FiraExtraction.model_validate(json.loads(text))

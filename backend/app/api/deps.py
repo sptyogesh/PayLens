@@ -6,6 +6,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
+from app.ai.gemini import GeminiLlm
 from app.ai.llm import AnthropicLlm, LlmClient
 from app.common.constants import FX_TIMEOUT_S, LLM_TIMEOUT_S
 from app.common.http_client import make_client
@@ -42,11 +43,14 @@ def get_fx_gateway() -> FxGateway:
 
 @lru_cache
 def get_llm() -> LlmClient:
-    """The fake LLM in tests and E2E (LLM_MODE=fake); the Anthropic client otherwise."""
+    """The fake LLM in tests and E2E (LLM_MODE=fake); otherwise the client of the provider that
+    settings chose (LLM_PROVIDER, or detected from the key prefix; research R5)."""
     settings = get_settings()
     if settings.llm_mode == "fake":
         return FakeLlm()
     client = make_client(settings.llm_api_url, LLM_TIMEOUT_S)
+    if settings.llm_provider == "gemini":
+        return GeminiLlm(client, settings.llm_api_key, settings.llm_model)
     return AnthropicLlm(client, settings.llm_api_key, settings.llm_model)
 
 
