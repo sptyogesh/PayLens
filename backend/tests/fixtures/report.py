@@ -13,8 +13,8 @@ from app.fakes.llm_fake import FakeLlm
 from app.schemas.report import ReportData, ReportFigures
 from app.services.fira_service import upload
 from app.services.refresh_service import safe_refresh
+from app.services.seed_service import seed_demo as seed
 from scripts.generate_fira_samples import generate
-from scripts.seed_demo import seed
 
 NOW = datetime(2026, 11, 10, 6, 0, tzinfo=UTC)  # 11:30 IST
 

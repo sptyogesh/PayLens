@@ -7,34 +7,13 @@ Usage (from backend/):
 
 import argparse
 
-from sqlalchemy.orm import Session
-
 from app.api.deps import get_fx_gateway
-from app.common.dates import utc_now
 from app.db import get_engine, get_session_factory
 from app.models import Base
 from app.services.fira_rematch import delete_all_firas
 from app.services.refresh_service import safe_refresh
-from app.services.seed_service import (
-    count_seed_rows,
-    months_before,
-    reset_seed,
-    upsert_seed_client,
-    upsert_seed_transaction,
-)
-from scripts.seed_data import SEED_CLIENTS, seed_rows
-
-
-def seed(session: Session) -> int:
-    clients = [upsert_seed_client(session, client) for client in SEED_CLIENTS]
-    now = utc_now()
-    added = 0
-    for row in seed_rows():
-        when = months_before(now, row.months_ago, row.day)
-        added += upsert_seed_transaction(
-            session, row.seed_id, clients[row.client_index], when, row.gross
-        )
-    return added
+from app.services.seed_service import count_seed_rows, reset_seed
+from app.services.seed_service import seed_demo as seed
 
 
 def main(argv: list[str] | None = None) -> None:

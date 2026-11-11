@@ -2,6 +2,10 @@ import { expect, test } from "@playwright/test";
 
 import { API_URL, formatInr, resetDatabase, seedDemo } from "./support/db";
 
+const CLOCK_STEP_MS = 10_000; // fake time per step; the wake window is 90 s
+const STEP_CHECK_MS = 500;
+const GIVE_UP_MS = 30_000;
+
 test.beforeEach(() => {
   resetDatabase();
 });
@@ -24,11 +28,15 @@ test("E2 Sync now stores sandbox payments once, with a source badge on every row
 });
 
 test("E10 backend unavailable shows an error with retry", async ({ page }) => {
+  // Page loads retry for the wake window (free-tier wake-up); the fake clock skips that wait.
+  await page.clock.install();
   await page.route(`${API_URL}/transactions*`, (route) => route.abort());
   await page.goto("/transactions");
-  await expect(
-    page.getByRole("alert").filter({ hasText: "Cannot reach the PayLens server" }),
-  ).toBeVisible();
+  const alert = page.getByRole("alert").filter({ hasText: "Cannot reach the PayLens server" });
+  await expect(async () => {
+    await page.clock.fastForward(CLOCK_STEP_MS);
+    await expect(alert).toBeVisible({ timeout: STEP_CHECK_MS });
+  }).toPass({ timeout: GIVE_UP_MS });
   await page.unroute(`${API_URL}/transactions*`);
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(page.getByText("No transactions yet")).toBeVisible();

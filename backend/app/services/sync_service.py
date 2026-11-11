@@ -1,7 +1,6 @@
 """Run a sync and record it in sync_runs (FR-019 to FR-022)."""
 
 import logging
-import threading
 import uuid
 from datetime import datetime, timedelta
 
@@ -110,14 +109,3 @@ def run_startup_sync(
     except Exception:
         logger.exception("Startup sync failed unexpectedly")
     safe_refresh(factory, fx)
-
-
-def start_startup_sync_thread(
-    factory: SessionFactory, engine: Engine, gateway: PayPalGateway, fx: FxGateway
-) -> None:
-    threading.Thread(
-        target=run_startup_sync,
-        args=(factory, engine, gateway, fx),
-        name="startup-sync",
-        daemon=True,
-    ).start()

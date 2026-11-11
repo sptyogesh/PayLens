@@ -26,8 +26,8 @@ from app.common.constants import FIRA_FAKE_MARKER, FIRA_SAMPLES_DIR
 from app.common.dates import ist_date, utc_now
 from app.common.money import round_money, to_api_string, to_rate_string
 from app.fakes.fx_fake import FAKE_RATES
+from app.services.seed_data import SEED_CLIENTS, SeedRow, seed_rows
 from app.services.seed_service import months_before
-from scripts.seed_data import SEED_CLIENTS, SeedRow, seed_rows
 
 REPO_ROOT: Final = Path(__file__).resolve().parents[2]
 DEMO_LABEL: Final = "DEMO SAMPLE — not a real bank document"

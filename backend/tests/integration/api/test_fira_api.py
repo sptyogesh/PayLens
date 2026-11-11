@@ -13,8 +13,8 @@ from app.config import get_settings
 from app.fakes.fx_fake import FakeFxGateway
 from app.fakes.llm_fake import FakeLlm
 from app.services.refresh_service import safe_refresh
+from app.services.seed_service import seed_demo as seed
 from scripts.generate_fira_samples import generate
-from scripts.seed_demo import seed
 from tests.fixtures.fira import fira_pdf
 
 PDF = {"content-type": "application/pdf"}

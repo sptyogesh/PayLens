@@ -50,7 +50,8 @@ export const MESSAGES = {
   loading: "Loading…",
   genericError: "Something went wrong. Please try again.",
   invalidResponse: "The server sent data in an unexpected format.",
-  networkError: "Cannot reach the PayLens server. Check that it is running.",
+  networkError:
+    "Cannot reach the PayLens server. If the app was idle it may be waking up: try again in a minute.",
   timeout: "The server took too long to answer. Please try again.",
   retry: "Try again",
 } as const;

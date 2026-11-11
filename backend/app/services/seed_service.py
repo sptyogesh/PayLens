@@ -8,6 +8,7 @@ from sqlalchemy import CursorResult, delete, func, select
 from sqlalchemy.orm import Session
 
 from app.common.constants import SEED_FEE_FIXED, SEED_FEE_PERCENT
+from app.common.dates import utc_now
 from app.common.money import round_money
 from app.common.types import (
     TransactionKind,
@@ -16,6 +17,7 @@ from app.common.types import (
     TransactionStatus,
 )
 from app.models import Client, Transaction
+from app.services.seed_data import SEED_CLIENTS, seed_rows
 
 SEED = TransactionSource.DEMO_SEED
 ClientSeed = tuple[str, str, str, str]
@@ -57,6 +59,20 @@ def upsert_seed_transaction(
     row.gross_amount, row.fee_amount, row.net_amount = gross, fee, gross - fee
     if row.leakage_inputs() != before:
         row.clear_leakage()
+    return added
+
+
+def seed_demo(session: Session) -> int:
+    """Add or refresh the 24 demo rows (dates relative to now). Idempotent: rows are keyed by their
+    seed id, so running it again never duplicates. Returns how many rows were new; no commit."""
+    clients = [upsert_seed_client(session, client) for client in SEED_CLIENTS]
+    now = utc_now()
+    added = 0
+    for row in seed_rows():
+        when = months_before(now, row.months_ago, row.day)
+        added += upsert_seed_transaction(
+            session, row.seed_id, clients[row.client_index], when, row.gross
+        )
     return added
 
 

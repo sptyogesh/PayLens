@@ -14,16 +14,17 @@ from app.common.errors import register_error_handlers
 from app.config import get_settings
 from app.db import get_engine, get_session_factory
 from app.models import Base
-from app.services.sync_service import start_startup_sync_thread
+from app.services.startup_service import StartupDeps, StartupJobs, start_startup_thread
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    Base.metadata.create_all(get_engine())
-    if get_settings().startup_sync_enabled:
-        start_startup_sync_thread(
-            get_session_factory(), get_engine(), get_gateway(), get_fx_gateway()
-        )
+    Base.metadata.create_all(get_engine())  # creates missing tables on every start (Render too)
+    settings = get_settings()
+    jobs = StartupJobs(seed_demo=settings.seed_demo_on_startup, sync=settings.startup_sync_enabled)
+    if jobs.any:
+        deps = StartupDeps(get_session_factory(), get_engine(), get_gateway(), get_fx_gateway())
+        start_startup_thread(deps, jobs)
     yield
 
 

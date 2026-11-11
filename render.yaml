@@ -46,6 +46,11 @@ services:
         value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1"
       - key: STARTUP_SYNC_ENABLED
         value: "true"
+      # Loads the 24 labelled "Demo seed" payments on every start (idempotent: keyed by seed id),
+      # because the free plan has no shell to run `python -m scripts.seed_demo`. Off by default in
+      # code; set "false" here to show only real sandbox data.
+      - key: SEED_DEMO_ON_STARTUP
+        value: "true"
       - key: FX_MODE
         value: http
       - key: FX_API_URL
@@ -69,13 +74,17 @@ services:
     runtime: node
     rootDir: frontend
     plan: free
+    # `npm run build` runs `prebuild` first (scripts/check-public-env.ts): the build stops if a
+    # NEXT_PUBLIC_* value is missing or wrong, because Next.js bakes them into the bundle at build
+    # time. After changing one, redeploy paylens-web so it is built again.
     buildCommand: npm ci && npm run build
     startCommand: npm start
     autoDeployTrigger: checksPass
     envVars:
       - key: NODE_VERSION
         value: "24"
-      - key: NEXT_PUBLIC_API_URL  # the paylens-api URL, e.g. https://paylens-api.onrender.com
+      # Exact paylens-api URL, https, no trailing slash, e.g. https://paylens-api.onrender.com
+      - key: NEXT_PUBLIC_API_URL
         sync: false
       - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID  # sandbox client ID (public by design)
         sync: false
