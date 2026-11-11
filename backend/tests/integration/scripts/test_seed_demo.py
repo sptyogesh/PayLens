@@ -13,7 +13,7 @@ from app.paypal.mapper import from_search_row
 from app.paypal.schemas import TransactionDetail
 from app.paypal.upsert import upsert_transaction
 from app.services.seed_service import count_seed_rows, months_before, reset_seed, seed_fee
-from scripts.seed_demo import seed
+from app.services.seed_service import seed_demo as seed
 from tests.fixtures.paypal.search import row
 
 

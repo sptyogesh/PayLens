@@ -5,3 +5,4 @@ export * from "./leakage";
 export * from "./chat";
 export * from "./fira";
 export * from "./report";
+export * from "./wake";

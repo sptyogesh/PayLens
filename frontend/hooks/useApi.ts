@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { z } from "zod";
 
 import { ApiError, apiGet } from "@/lib/api/client";
+import { retryWhileWaking } from "@/lib/api/wake";
 import { MESSAGES } from "@/lib/constants";
 
 export type ApiState<T> =
@@ -15,7 +16,8 @@ export function toApiError(error: unknown): ApiError {
 
 /**
  * GET `path`, validate with `schema`, expose loading / success / error and reload().
- * The state is keyed by path, so switching to a new path shows "loading" at once instead of
+ * While a sleeping backend starts (network error, 502/503/504) it keeps retrying and stays
+ * "loading" instead of showing an error (free-tier wake-up). The state is keyed by path, so switching to a new path shows "loading" at once instead of
  * the previous path's data.
  */
 export function useApi<T>(
@@ -27,7 +29,7 @@ export function useApi<T>(
 
   useEffect(() => {
     let active = true;
-    apiGet(path, schema).then(
+    retryWhileWaking(() => apiGet(path, schema)).then(
       (data) => {
         if (active) setResult({ path, state: { status: "success", data } });
       },

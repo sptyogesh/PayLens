@@ -2,12 +2,17 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { z } from "zod";
 
+import { wakeDefaults } from "@/lib/api/wake";
 import { server } from "@/test/msw/server";
 
 import { useApi } from "./useApi";
 
 const API = "http://api.test";
 const Schema = z.object({ total: z.string() });
+const WAKE_TEST_WINDOW_MS = 1_500;
+const SERVICE_UNAVAILABLE = 503;
+const WAIT_FACTOR = 2;
+const CALLS_WITH_ONE_RETRY = 2;
 
 describe("useApi (U8)", () => {
   it("goes loading → success", async () => {
@@ -79,5 +84,32 @@ describe("useApi path changes", () => {
     await waitFor(() => {
       expect(result.current).toMatchObject({ status: "success", data: { total: "2.00" } });
     });
+  });
+});
+
+describe("useApi while the backend wakes up", () => {
+  afterEach(() => {
+    wakeDefaults.windowMs = 0;
+  });
+
+  it("stays loading through a 503 and then shows the data", async () => {
+    wakeDefaults.windowMs = WAKE_TEST_WINDOW_MS;
+    let calls = 0;
+    server.use(
+      http.get(`${API}/x`, () => {
+        calls += 1;
+        return calls === 1
+          ? HttpResponse.json({}, { status: SERVICE_UNAVAILABLE })
+          : HttpResponse.json({ total: "1.00" });
+      }),
+    );
+    const { result } = renderHook(() => useApi("/x", Schema));
+    await waitFor(
+      () => {
+        expect(result.current).toMatchObject({ status: "success", data: { total: "1.00" } });
+      },
+      { timeout: WAKE_TEST_WINDOW_MS * WAIT_FACTOR },
+    );
+    expect(calls).toBe(CALLS_WITH_ONE_RETRY);
   });
 });

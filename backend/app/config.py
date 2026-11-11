@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     # Proxies allowed to set X-Forwarded-For (uvicorn format: IPs/CIDRs, comma-separated).
     forwarded_allow_ips: str = LOCAL_PROXY
     startup_sync_enabled: bool = True
+    # Load the labelled demo seed in the startup thread (for hosts without a shell). Idempotent.
+    seed_demo_on_startup: bool = False
     rate_limit_enabled: bool = True
     fx_mode: Literal["http", "fake"] = "http"
     fx_api_url: str = FX_API_DEFAULT_URL

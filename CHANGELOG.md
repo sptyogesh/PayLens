@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `SEED_DEMO_ON_STARTUP` setting (off by default, on in `render.yaml`): loads the labelled demo seed in the startup background thread, idempotent, for hosts without a shell; startup jobs (seed, sync, refresh) run in one thread so `/health` answers at once
+- Free-tier wake-up handling: page loads retry while the backend starts (network error, 502/503/504, up to 90 s) and an app-wide "Waking up the PayLens server…" notice shows until `/health` answers, with a retry when it never does; actions that change data are never retried
+- Frontend build guard (`prebuild`, `scripts/check-public-env.ts`): the build stops when a `NEXT_PUBLIC_*` value is missing or wrong, because Next.js bakes them in at build time
+- README: Render deploy section (what runs on deploy, every environment variable per service and which are secret, free-plan sleep and database limits)
 - Gemini adapter behind the single LLM wrapper (`generateContent` over httpx, no SDK): tools as function declarations, call ids and thought signatures sent back, PDFs as inline data, JSON schema output for FIRA reading; `LLM_PROVIDER` setting, provider detected from the key prefix when empty, per-provider default model (`gemini-3.6-flash`, free tier) and URL; startup refused when the key, model or URL belongs to another provider; README note on free-tier data use (specs/003-ask-your-money research R5)
 - "The AI is busy, try again shortly" answer in the chat and on FIRA upload when the AI returns HTTP 429 (rate limit or free-tier quota) (specs/003-ask-your-money research R5)
 
@@ -55,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Demo seed rows and `seed_demo()` moved from `backend/scripts/` into `app/services/` so the app can load them at startup; `scripts.seed_demo` uses them; the network error message mentions a server that is waking up
 - HTTP 429 from the AI service is reported as "busy" (`LLM_BUSY`) instead of a generic outage; `LLM_MODEL` and `LLM_API_URL` default per provider; `render.yaml` uses Gemini (`gemini-3.6-flash`) (specs/003-ask-your-money research R5)
 - CA report shows INR amounts with "₹" using an embedded Noto Sans font (SIL OFL 1.1, licence in `backend/app/reports/fonts/OFL.txt`) for the rupee sign only; other text stays in the built-in font (specs/005-ca-report)
 - `frontend/.gitignore` ignores the `AGENTS.md` that `next dev` writes into `frontend/`

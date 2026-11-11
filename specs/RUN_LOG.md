@@ -121,3 +121,11 @@ All work is on branch `001-paypal-sync`, uncommitted unless noted.
   parts.
 - Real check: chat answer equals the dashboard (FX loss 49750.42, 24 payments); FIRA SEED-0001 all
   fields correct.
+
+## Render readiness — uncommitted
+- Tables: `create_all` at startup (already in place; test added). Demo data: `SEED_DEMO_ON_STARTUP`
+  (off in code, on in `render.yaml`), idempotent, run in the startup thread with sync and refresh.
+- Build-time `NEXT_PUBLIC_*`: `prebuild` guard stops the frontend build when one is missing/wrong.
+- Free-tier sleep: GET page loads retry 90 s on network/502/503/504; app-wide waking notice via
+  `/health`; POSTs never retried. E10 now uses Playwright's fake clock for the 90 s window.
+- README deploy section with every Render variable. Verification: backend 735, unit 199, E2E 63.

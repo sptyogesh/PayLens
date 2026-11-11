@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { WakeNotice } from "@/features/wake";
 import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -15,7 +16,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <AppShell>{children}</AppShell>
+        <AppShell>
+          <WakeNotice />
+          {children}
+        </AppShell>
       </body>
     </html>
   );
