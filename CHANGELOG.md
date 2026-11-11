@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- CA report shows INR amounts with "₹" using an embedded Noto Sans font (SIL OFL 1.1, licence in `backend/app/reports/fonts/OFL.txt`) for the rupee sign only; other text stays in the built-in font (specs/005-ca-report)
 - `frontend/.gitignore` ignores the `AGENTS.md` that `next dev` writes into `frontend/`
 - Backend constants split into `app/common/constants/` (core, leakage, chat, fira, report) behind the same import path; one `SIMULATED_LABEL`; LLM adapter selection moved to `api/deps.py` (removes an import cycle); package-entry imports; ReportLab type stubs handled by a mypy override (Phase 1A hardening)
 - Backend: `answer_question` takes the validated `ChatIn` (5 parameters max); sync, checkout, pay and FIRA service code imports through the `app.paypal` and `app.engine.fira_match` package entries

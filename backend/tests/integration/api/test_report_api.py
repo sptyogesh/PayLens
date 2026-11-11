@@ -64,7 +64,7 @@ def test_every_number_both_ways(
     assert NOT_TAX_ADVICE in text and "Simulated (sandbox)" in text
     assert all(note in text for note in data.notes)
     assert f"{REPORT_SUMMARY_AI_HEADING} For " in text and "₹" in data.summary.text
-    assert data.summary.text.replace("₹", "INR ") in text
+    assert data.summary.text in text
     assert f"Payments missing a FIRA {data.fira.missing}" in text
     assert f"Payments {data.totals.payment_count}" in text
 

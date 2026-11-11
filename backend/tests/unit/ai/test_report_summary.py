@@ -18,8 +18,8 @@ from app.fakes.llm_fake_report import ReportMode
 from tests.fixtures.report import figures, row
 
 CODE_TEXT = (
-    "This month: 2 payments, income INR 1,68,000.00 (mid-market). Total leakage was"
-    " INR 12,432.00 (7.40% of income), with FX loss at a Simulated (sandbox) rate."
+    "This month: 2 payments, income ₹1,68,000.00 (mid-market). Total leakage was"
+    " ₹12,432.00 (7.40% of income), with FX loss at a Simulated (sandbox) rate."
     " 1 payment is missing a FIRA."
 )
 

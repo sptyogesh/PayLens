@@ -45,6 +45,7 @@ test("E9 downloads the all-time CA report as a PDF built from the report data", 
   expect(total).toMatch(/^\d+\.\d{2}$/);
   expect(raw).toContain(`Total leakage`);
   expect(raw).toContain(formatReportInr(total));
+  expect(raw).toContain("NotoSans"); // the ₹ glyph comes from the embedded OFL font
   await expect(page.getByRole("button", { name: "Download CA report" })).toBeEnabled();
 });
 
