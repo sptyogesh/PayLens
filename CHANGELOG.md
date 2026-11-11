@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- CI: the Playwright browser install retries up to 3 times (with a fresh apt package list), so a short Ubuntu mirror DNS outage on the GitHub runner no longer fails the run
 - Settings errors at startup no longer print the input values (they could show `LLM_API_KEY` or PayPal secrets) (specs/003-ask-your-money research R5)
 - Rate limits behind Render's proxy: the client address is set by uvicorn's proxy-headers middleware, which accepts `X-Forwarded-For` only from proxies listed in the new `FORWARDED_ALLOW_IPS` setting (Render's private ranges in `render.yaml`), so each real client has its own limit and client-sent entries are ignored; replaces `TRUST_PROXY_HEADERS`
 - Rate limits use the address Render's proxy appends (the last `X-Forwarded-For` entry), so a spoofed header can no longer bypass them; LLM routes (`/chat`, `/fira/upload`, `/report*`) also share one global cap; old limiter windows are pruned; FIRA uploads limited to 10 per minute; sync start limited to the last 3 years (Phase 1A hardening)
