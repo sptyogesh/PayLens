@@ -1,0 +1,92 @@
+# Render Blueprint for PayLens (Phase 1A). Not deployed yet: the owner deploys after manual testing.
+# Field reference: https://render.com/docs/blueprint-spec (checked 2026-11-10, specs/002 research R8).
+# Secrets use `sync: false`: Render asks for them once when the Blueprint is created; never commit them.
+databases:
+  - name: paylens-db
+    databaseName: paylens
+    user: paylens
+    plan: free
+    postgresMajorVersion: "18"
+
+services:
+  - type: web
+    name: paylens-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: uv sync --frozen --no-dev
+    startCommand: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-proxy-headers
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: paylens-db
+          property: connectionString
+      - key: PAYPAL_MODE
+        value: http
+      - key: PAYPAL_BASE_URL
+        value: https://api-m.sandbox.paypal.com
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL  # the paylens-web URL, e.g. https://paylens-web.onrender.com
+        sync: false
+      # Proxies allowed to set X-Forwarded-For. Render's load balancers reach the service from the
+      # private network, so the private ranges are trusted and the client address is the first
+      # untrusted entry from the right (entries a client sends itself are ignored). After the first
+      # deploy, confirm two devices get separate rate limits; never set "*" (it trusts the
+      # left-most, client-controlled entry).
+      - key: FORWARDED_ALLOW_IPS
+        value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1"
+      - key: STARTUP_SYNC_ENABLED
+        value: "true"
+      # Loads the 24 labelled "Demo seed" payments on every start (idempotent: keyed by seed id),
+      # because the free plan has no shell to run `python -m scripts.seed_demo`. Off by default in
+      # code; set "false" here to show only real sandbox data.
+      - key: SEED_DEMO_ON_STARTUP
+        value: "true"
+      - key: FX_MODE
+        value: http
+      - key: FX_API_URL
+        value: https://api.frankfurter.dev
+      - key: LLM_MODE
+        value: http
+      # Gemini free tier (owner choice, research R5). Startup is refused if LLM_API_KEY is a key of
+      # another provider. The free tier may use sent content to improve Google's products: sandbox
+      # and sample data only.
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: gemini-3.6-flash
+      - key: LLM_API_URL
+        value: https://generativelanguage.googleapis.com
+
+  - type: web
+    name: paylens-web
+    runtime: node
+    rootDir: frontend
+    plan: free
+    # `npm run build` runs `prebuild` first (scripts/check-public-env.ts): the build stops if a
+    # NEXT_PUBLIC_* value is missing or wrong, because Next.js bakes them into the bundle at build
+    # time. After changing one, redeploy paylens-web so it is built again.
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Exact paylens-api URL, https, no trailing slash, e.g. https://paylens-api.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID  # sandbox client ID (public by design)
+        sync: false
+      - key: NEXT_PUBLIC_PAYPAL_MODE
+        value: http

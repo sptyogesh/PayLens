@@ -1,0 +1,1998 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PayLens API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync": {
+      "post": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Post Sync",
+        "operationId": "post_sync_sync_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SyncRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncRunOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/last": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Last Sync",
+        "operationId": "last_sync_sync_last_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SyncRunOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Last Sync Sync Last Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Get Transactions",
+        "operationId": "get_transactions_transactions_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "income",
+                "all"
+              ],
+              "type": "string",
+              "default": "income",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TransactionSource"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Dashboard",
+        "operationId": "dashboard_dashboard_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DashboardPeriod",
+              "default": "last_3_months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pay/orders": {
+      "post": {
+        "tags": [
+          "pay"
+        ],
+        "summary": "Post Order",
+        "operationId": "post_order_pay_orders_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayOrderIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayOrderOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pay/orders/{order_id}/capture": {
+      "post": {
+        "tags": [
+          "pay"
+        ],
+        "summary": "Post Capture",
+        "operationId": "post_capture_pay_orders__order_id__capture_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{1,32}$",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Post Chat",
+        "operationId": "post_chat_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fira/upload": {
+      "post": {
+        "tags": [
+          "fira"
+        ],
+        "summary": "Post Fira Upload",
+        "operationId": "post_fira_upload_fira_upload_post",
+        "parameters": [
+          {
+            "name": "file_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "\\S",
+              "description": "name.pdf",
+              "title": "File Name"
+            },
+            "description": "name.pdf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResultOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fira": {
+      "get": {
+        "tags": [
+          "fira"
+        ],
+        "summary": "Get Firas",
+        "operationId": "get_firas_fira_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiraListOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report/data": {
+      "get": {
+        "tags": [
+          "report"
+        ],
+        "summary": "Report Data",
+        "operationId": "report_data_report_data_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DashboardPeriod",
+              "default": "last_3_months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportData"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report.pdf": {
+      "get": {
+        "tags": [
+          "report"
+        ],
+        "summary": "Report Pdf",
+        "operationId": "report_pdf_report_pdf_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DashboardPeriod",
+              "default": "last_3_months"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The CA report PDF.",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BreakdownRowOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TotalsOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "totals"
+        ],
+        "title": "BreakdownRowOut"
+      },
+      "CaptureOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "pending"
+            ],
+            "title": "Status"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "recorded": {
+            "type": "boolean",
+            "title": "Recorded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "order_id",
+          "status",
+          "gross",
+          "recorded"
+        ],
+        "title": "CaptureOut"
+      },
+      "ChatIn": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "ChatIn"
+      },
+      "ChatOut": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "answered",
+              "no_data",
+              "fallback"
+            ],
+            "title": "Outcome"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Periods"
+          },
+          "figures": {
+            "items": {
+              "$ref": "#/components/schemas/FigureOut"
+            },
+            "type": "array",
+            "title": "Figures"
+          },
+          "disclaimer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disclaimer"
+          },
+          "tools_used": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tools Used"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "outcome",
+          "periods",
+          "figures",
+          "disclaimer",
+          "tools_used"
+        ],
+        "title": "ChatOut"
+      },
+      "ChatTurn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatTurn"
+      },
+      "ClientRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "country"
+        ],
+        "title": "ClientRef"
+      },
+      "CountsOut": {
+        "properties": {
+          "added": {
+            "type": "integer",
+            "title": "Added"
+          },
+          "updated": {
+            "type": "integer",
+            "title": "Updated"
+          },
+          "skipped": {
+            "type": "integer",
+            "title": "Skipped"
+          },
+          "flagged": {
+            "type": "integer",
+            "title": "Flagged"
+          }
+        },
+        "type": "object",
+        "required": [
+          "added",
+          "updated",
+          "skipped",
+          "flagged"
+        ],
+        "title": "CountsOut"
+      },
+      "DashboardOut": {
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/DashboardPeriodOut"
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TotalsOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "excluded_count": {
+            "type": "integer",
+            "title": "Excluded Count"
+          },
+          "not_calculated_count": {
+            "type": "integer",
+            "title": "Not Calculated Count"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "paypal_rate_simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Paypal Rate Simulated",
+            "default": true
+          },
+          "simulated_spread_percent": {
+            "type": "string",
+            "pattern": "^-?\\d+\\.\\d{2}$",
+            "title": "Simulated Spread Percent"
+          },
+          "by_month": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Month"
+          },
+          "by_client": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Client"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "totals",
+          "excluded_count",
+          "not_calculated_count",
+          "sources",
+          "simulated_spread_percent",
+          "by_month",
+          "by_client"
+        ],
+        "title": "DashboardOut"
+      },
+      "DashboardPeriod": {
+        "type": "string",
+        "enum": [
+          "this_month",
+          "last_3_months",
+          "all_time"
+        ],
+        "title": "DashboardPeriod"
+      },
+      "DashboardPeriodOut": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/DashboardPeriod"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "start",
+          "end"
+        ],
+        "title": "DashboardPeriodOut"
+      },
+      "FigureOut": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "money",
+              "count",
+              "percent"
+            ],
+            "title": "Kind"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "kind",
+          "value",
+          "currency",
+          "period"
+        ],
+        "title": "FigureOut",
+        "description": "A figure behind the answer, copied from a tool result by code (FR-005)."
+      },
+      "FiraDocStatus": {
+        "type": "string",
+        "enum": [
+          "matched",
+          "needs_review",
+          "no_match"
+        ],
+        "title": "FiraDocStatus"
+      },
+      "FiraItemOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FiraDocStatus"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "foreign_amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inr_amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MoneyOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "remittance_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remittance Date"
+          },
+          "reference_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference No"
+          },
+          "remitter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remitter"
+          },
+          "purpose_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purpose Code"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          },
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/FiraMatchOut"
+            },
+            "type": "array",
+            "title": "Matches"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "file_name",
+          "status",
+          "score",
+          "reason",
+          "foreign_amount",
+          "inr_amount",
+          "rate",
+          "remittance_date",
+          "reference_no",
+          "remitter",
+          "purpose_code",
+          "uploaded_at",
+          "matches"
+        ],
+        "title": "FiraItemOut"
+      },
+      "FiraListOut": {
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/FiraSummaryOut"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FiraItemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "missing": {
+            "items": {
+              "$ref": "#/components/schemas/FiraPaymentOut"
+            },
+            "type": "array",
+            "title": "Missing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "items",
+          "missing"
+        ],
+        "title": "FiraListOut"
+      },
+      "FiraMatchKind": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "weekly"
+        ],
+        "title": "FiraMatchKind"
+      },
+      "FiraMatchOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Transaction Id"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/FiraMatchKind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "paypal_transaction_id",
+          "score",
+          "kind"
+        ],
+        "title": "FiraMatchOut"
+      },
+      "FiraPaymentOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Transaction Id"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "client": {
+            "type": "string",
+            "title": "Client"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "paypal_transaction_id",
+          "date",
+          "client",
+          "gross"
+        ],
+        "title": "FiraPaymentOut",
+        "description": "An eligible payment (used for the \"missing FIRA\" list)."
+      },
+      "FiraStatus": {
+        "type": "string",
+        "enum": [
+          "matched",
+          "needs_review",
+          "missing"
+        ],
+        "title": "FiraStatus"
+      },
+      "FiraSummaryOut": {
+        "properties": {
+          "matched": {
+            "type": "integer",
+            "title": "Matched"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "no_match": {
+            "type": "integer",
+            "title": "No Match"
+          },
+          "missing_payments": {
+            "type": "integer",
+            "title": "Missing Payments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "matched",
+          "needs_review",
+          "no_match",
+          "missing_payments"
+        ],
+        "title": "FiraSummaryOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LeakageOut": {
+        "properties": {
+          "mid_market_rate": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d{6}$",
+            "title": "Mid Market Rate"
+          },
+          "paypal_rate": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d{6}$",
+            "title": "Paypal Rate"
+          },
+          "paypal_rate_simulated": {
+            "type": "boolean",
+            "const": true,
+            "title": "Paypal Rate Simulated",
+            "default": true
+          },
+          "ideal_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "inr_received": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fee_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fx_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "total_leakage_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "leakage_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+\\.\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leakage Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mid_market_rate",
+          "paypal_rate",
+          "ideal_inr",
+          "inr_received",
+          "fee_loss_inr",
+          "fx_loss_inr",
+          "total_leakage_inr",
+          "leakage_percent"
+        ],
+        "title": "LeakageOut"
+      },
+      "MoneyOut": {
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^-?\\d+\\.\\d{2}$",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "title": "MoneyOut"
+      },
+      "PayOrderIn": {
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d{1,2})?$",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD",
+              "GBP",
+              "EUR",
+              "AUD"
+            ],
+            "title": "Currency"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 127
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "title": "PayOrderIn"
+      },
+      "PayOrderOut": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id"
+        ],
+        "title": "PayOrderOut"
+      },
+      "PeriodOut": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "PeriodOut"
+      },
+      "ReportData": {
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/DashboardPeriodOut"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TotalsOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gross_by_currency": {
+            "items": {
+              "$ref": "#/components/schemas/MoneyOut"
+            },
+            "type": "array",
+            "title": "Gross By Currency"
+          },
+          "by_month": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Month"
+          },
+          "by_client": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownRowOut"
+            },
+            "type": "array",
+            "title": "By Client"
+          },
+          "excluded_count": {
+            "type": "integer",
+            "title": "Excluded Count"
+          },
+          "not_calculated_count": {
+            "type": "integer",
+            "title": "Not Calculated Count"
+          },
+          "simulated_spread_percent": {
+            "type": "string",
+            "title": "Simulated Spread Percent"
+          },
+          "fira": {
+            "$ref": "#/components/schemas/ReportFira"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ReportSummary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "generated_at",
+          "totals",
+          "gross_by_currency",
+          "by_month",
+          "by_client",
+          "excluded_count",
+          "not_calculated_count",
+          "simulated_spread_percent",
+          "fira",
+          "notes",
+          "disclaimer",
+          "summary"
+        ],
+        "title": "ReportData"
+      },
+      "ReportFira": {
+        "properties": {
+          "uploaded": {
+            "type": "integer",
+            "title": "Uploaded"
+          },
+          "matched": {
+            "type": "integer",
+            "title": "Matched"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "missing": {
+            "type": "integer",
+            "title": "Missing"
+          },
+          "missing_payments": {
+            "items": {
+              "$ref": "#/components/schemas/ReportMissingPayment"
+            },
+            "type": "array",
+            "title": "Missing Payments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "uploaded",
+          "matched",
+          "needs_review",
+          "missing",
+          "missing_payments"
+        ],
+        "title": "ReportFira",
+        "description": "FIRA status of the eligible payments in the period; `uploaded` counts every FIRA stored."
+      },
+      "ReportMissingPayment": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "client": {
+            "type": "string",
+            "title": "Client"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "client",
+          "paypal_transaction_id",
+          "gross"
+        ],
+        "title": "ReportMissingPayment"
+      },
+      "ReportSummary": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "code"
+            ],
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "source"
+        ],
+        "title": "ReportSummary"
+      },
+      "SyncErrorOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "SyncErrorOut"
+      },
+      "SyncOutcome": {
+        "type": "string",
+        "enum": [
+          "running",
+          "success",
+          "partial",
+          "failed"
+        ],
+        "title": "SyncOutcome"
+      },
+      "SyncRequest": {
+        "properties": {
+          "start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "title": "SyncRequest"
+      },
+      "SyncRunOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/SyncTrigger"
+          },
+          "period": {
+            "$ref": "#/components/schemas/PeriodOut"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/SyncOutcome"
+          },
+          "windows": {
+            "$ref": "#/components/schemas/WindowsOut"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/CountsOut"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SyncErrorOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "trigger",
+          "period",
+          "started_at",
+          "finished_at",
+          "outcome",
+          "windows",
+          "counts",
+          "error",
+          "hint"
+        ],
+        "title": "SyncRunOut"
+      },
+      "SyncTrigger": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "startup"
+        ],
+        "title": "SyncTrigger"
+      },
+      "TotalsOut": {
+        "properties": {
+          "payment_count": {
+            "type": "integer",
+            "title": "Payment Count"
+          },
+          "income_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fee_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fx_loss_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "total_leakage_inr": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "leakage_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+\\.\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leakage Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_count",
+          "income_inr",
+          "fee_loss_inr",
+          "fx_loss_inr",
+          "total_leakage_inr",
+          "leakage_percent"
+        ],
+        "title": "TotalsOut"
+      },
+      "TransactionKind": {
+        "type": "string",
+        "enum": [
+          "income",
+          "outgoing_payment",
+          "refund",
+          "withdrawal",
+          "conversion",
+          "hold",
+          "fee",
+          "other"
+        ],
+        "title": "TransactionKind"
+      },
+      "TransactionListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "TransactionListOut"
+      },
+      "TransactionOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "paypal_transaction_id": {
+            "type": "string",
+            "title": "Paypal Transaction Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "client": {
+            "$ref": "#/components/schemas/ClientRef"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TransactionKind"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "gross": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "fee": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "net": {
+            "$ref": "#/components/schemas/MoneyOut"
+          },
+          "source": {
+            "$ref": "#/components/schemas/TransactionSource"
+          },
+          "is_flagged": {
+            "type": "boolean",
+            "title": "Is Flagged"
+          },
+          "leakage_status": {
+            "type": "string",
+            "enum": [
+              "calculated",
+              "rate_unavailable",
+              "not_calculated",
+              "not_applicable"
+            ],
+            "title": "Leakage Status"
+          },
+          "leakage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeakageOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fira_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FiraStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "paypal_transaction_id",
+          "occurred_at",
+          "client",
+          "kind",
+          "status",
+          "gross",
+          "fee",
+          "net",
+          "source",
+          "is_flagged",
+          "leakage_status",
+          "leakage",
+          "fira_status"
+        ],
+        "title": "TransactionOut"
+      },
+      "TransactionSource": {
+        "type": "string",
+        "enum": [
+          "paypal_sandbox",
+          "demo_seed"
+        ],
+        "title": "TransactionSource"
+      },
+      "TransactionStatus": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "pending",
+          "denied",
+          "reversed"
+        ],
+        "title": "TransactionStatus"
+      },
+      "UploadFileOut": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "stored",
+              "duplicate",
+              "rejected",
+              "failed"
+            ],
+            "title": "Outcome"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "fira_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fira Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FiraDocStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_name",
+          "outcome",
+          "message",
+          "fira_id",
+          "status"
+        ],
+        "title": "UploadFileOut",
+        "description": "What happened to one uploaded file. `status` is set only when it was stored."
+      },
+      "UploadResultOut": {
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/UploadFileOut"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/FiraSummaryOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result",
+          "summary"
+        ],
+        "title": "UploadResultOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WindowsOut": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "done"
+        ],
+        "title": "WindowsOut"
+      }
+    }
+  }
+}

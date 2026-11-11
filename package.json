@@ -1,0 +1,30 @@
+{
+  "name": "paylens",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PayLens root tooling only (scripts, git hooks). App code lives in backend/ and frontend/.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "lint": "npm run lint --prefix frontend && uv run --directory backend ruff check . ../scripts && uv run --directory backend ruff format --check . ../scripts",
+    "typecheck": "npm run typecheck --prefix frontend && uv run --directory backend mypy app scripts tests ../scripts",
+    "test:backend": "uv run --directory backend pytest --cov=app",
+    "test:unit": "npm run test --prefix frontend",
+    "test:e2e": "npm run test:e2e --prefix frontend",
+    "check:size": "uv run --project backend python scripts/check_file_size.py",
+    "check": "npm run lint && npm run typecheck && npm run check:size && npm run test:backend && npm run test:unit",
+    "check:all": "npm run check && npm run test:e2e",
+    "gen:api": "uv run --directory backend python -m scripts.export_openapi && npm run gen:api --prefix frontend"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@secretlint/secretlint-rule-preset-recommend": "^13.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "secretlint": "^13.1.0"
+  }
+}

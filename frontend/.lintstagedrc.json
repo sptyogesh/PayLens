@@ -1,0 +1,11 @@
+{
+  "*.{ts,tsx}": [
+    "eslint --fix --max-warnings=0 --no-warn-ignored",
+    "prettier --write",
+    "uv run --project ../backend python ../scripts/check_file_size.py"
+  ],
+  "*.{json,md,css,mjs}": ["prettier --write"],
+  "*": [
+    "../node_modules/.bin/secretlint --secretlintrc ../.secretlintrc.json --secretlintignore ../.secretlintignore --maskSecrets"
+  ]
+}
