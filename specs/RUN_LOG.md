@@ -108,3 +108,16 @@ All work is on branch `001-paypal-sync`, uncommitted unless noted.
 - Final verification, two consecutive runs, both green: lint/typecheck (252 files)/size OK; backend
   635 passed (98% coverage); frontend unit 169 passed; Playwright 61 passed, 1 skipped (journey on
   the mobile project, by design). No flaky tests.
+
+## Gemini adapter (owner choice: free tier) — uncommitted
+- Built: `GeminiLlm` behind the single wrapper (generateContent over httpx; translation in
+  `gemini_format.py`), provider selection (`LLM_PROVIDER` or key prefix; startup refused when key,
+  model or URL belong to another provider; only the provider's own https URL), default model per
+  provider, 429 → "The AI is busy, try again shortly" (chat, FIRA), settings errors hide inputs.
+- Docs: Google's generateContent docs read 2026-11-11 (research R5). Default `gemini-3.6-flash`
+  (3.8 Flash overloaded on the day).
+- Review fixes (code-reviewer): URL check by parsed host/scheme (variants of the other provider's
+  URL and http were accepted); key whitespace stripped before prefix detection; FIRA reads all text
+  parts.
+- Real check: chat answer equals the dashboard (FX loss 49750.42, 24 payments); FIRA SEED-0001 all
+  fields correct.

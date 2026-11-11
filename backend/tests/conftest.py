@@ -43,7 +43,8 @@ from app.config import Settings, get_settings  # noqa: E402
 
 # Tests never read backend/.env, so real sandbox credentials can't leak into a test run.
 Settings.model_config["env_file"] = None
-for key in ("PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "LLM_API_KEY", "LLM_MODEL"):
+SECRET_OR_LLM_KEYS = ("PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "LLM_API_KEY", "LLM_MODEL")
+for key in (*SECRET_OR_LLM_KEYS, "LLM_PROVIDER", "LLM_API_URL"):
     os.environ.pop(key, None)
 from app.models import Base  # noqa: E402
 

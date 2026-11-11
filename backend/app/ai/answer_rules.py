@@ -12,6 +12,7 @@ NO_DATA_TEMPLATE: Final = (
 UNAVAILABLE_ANSWER: Final = (
     "The assistant is not available right now. Your numbers are on the dashboard."
 )
+BUSY_ANSWER: Final = "The AI is busy, try again shortly. Your numbers are on the dashboard."
 UNGROUNDED_TEMPLATE: Final = "Here are the figures from your data for {periods}."
 UNGROUNDED_NO_PERIOD: Final = "Here are the figures from your data."
 INCOMPLETE_ANSWER: Final = "I could not finish this answer. Please try asking in a simpler way."

@@ -3,20 +3,16 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.common.constants import (
-    FX_API_DEFAULT_URL,
-    LLM_DEFAULT_API_URL,
-    LLM_DEFAULT_MODEL,
-    LOCAL_PROXY,
-    PAYPAL_SANDBOX_BASE_URL,
-)
+from app.common.constants import FX_API_DEFAULT_URL, LOCAL_PROXY, PAYPAL_SANDBOX_BASE_URL
+from app.common.llm_provider import choose_llm
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Startup errors never echo the input values (they include LLM_API_KEY and PayPal secrets).
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
 
     app_env: Literal["development", "test", "production"] = "development"
     paypal_mode: Literal["http", "fake"] = "http"
@@ -32,9 +28,16 @@ class Settings(BaseSettings):
     fx_mode: Literal["http", "fake"] = "http"
     fx_api_url: str = FX_API_DEFAULT_URL
     llm_mode: Literal["http", "fake"] = "http"
+    # Empty provider: detected from the key prefix. Empty model / URL: the provider's default.
+    llm_provider: Literal["", "anthropic", "gemini"] = ""
     llm_api_key: str = ""
-    llm_model: str = LLM_DEFAULT_MODEL
-    llm_api_url: str = LLM_DEFAULT_API_URL
+    llm_model: str = ""
+    llm_api_url: str = ""
+
+    @field_validator("llm_api_key")
+    @classmethod
+    def strip_key(cls, value: str) -> str:
+        return value.strip()  # a pasted space or newline must not hide the key prefix
 
     @model_validator(mode="after")
     def check_safety_rules(self) -> "Settings":
@@ -52,6 +55,8 @@ class Settings(BaseSettings):
             raise ValueError("LLM_MODE=fake is only allowed when APP_ENV=test")
         if self.llm_mode == "http" and not self.llm_api_key:
             raise ValueError("LLM_API_KEY is required (or LLM_MODE=fake with APP_ENV=test)")
+        llm = choose_llm(self.llm_provider, self.llm_api_key, self.llm_model, self.llm_api_url)
+        self.llm_provider, self.llm_model, self.llm_api_url = llm.provider, llm.model, llm.api_url
         return self
 
     @property

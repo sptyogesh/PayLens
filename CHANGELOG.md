@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Gemini adapter behind the single LLM wrapper (`generateContent` over httpx, no SDK): tools as function declarations, call ids and thought signatures sent back, PDFs as inline data, JSON schema output for FIRA reading; `LLM_PROVIDER` setting, provider detected from the key prefix when empty, per-provider default model (`gemini-3.6-flash`, free tier) and URL; startup refused when the key, model or URL belongs to another provider; README note on free-tier data use (specs/003-ask-your-money research R5)
+- "The AI is busy, try again shortly" answer in the chat and on FIRA upload when the AI returns HTTP 429 (rate limit or free-tier quota) (specs/003-ask-your-money research R5)
+
 - CA report PDF (`GET /report.pdf`, `GET /report/data`, "Download CA report" on the dashboard): income summary, by month and by client, fee and FX loss (Simulated (sandbox)), FIRA status with missing payments, data notes and the "not tax advice, confirm with a CA" disclaimer on every page; every number comes from the same code as the dashboard and FIRA page; the AI writes only a short grounded summary with a code-written fallback (specs/005-ca-report)
 - `render.yaml` Render Blueprint (backend, frontend, PostgreSQL 18) with secrets as prompted values — not deployed yet (specs/002-leakage-dashboard US4)
 - FIRA matching (`/fira`, `POST /fira/upload`, `GET /fira`): PDF-only uploads up to 5 MB with duplicate (SHA-256) rejection before any AI call; AI extraction into a strict JSON schema, validated in code; pure matching engine (reference +60, amount ±1% +25, date ±7 days +15; ≥80 matched, 50–79 needs review), one payment per FIRA, weekly sum-match; FIRA badges in the transactions grid; statuses recomputed after upload, sync, seed and /pay (specs/004-fira-matching)
@@ -36,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Settings errors at startup no longer print the input values (they could show `LLM_API_KEY` or PayPal secrets) (specs/003-ask-your-money research R5)
 - Rate limits behind Render's proxy: the client address is set by uvicorn's proxy-headers middleware, which accepts `X-Forwarded-For` only from proxies listed in the new `FORWARDED_ALLOW_IPS` setting (Render's private ranges in `render.yaml`), so each real client has its own limit and client-sent entries are ignored; replaces `TRUST_PROXY_HEADERS`
 - Rate limits use the address Render's proxy appends (the last `X-Forwarded-For` entry), so a spoofed header can no longer bypass them; LLM routes (`/chat`, `/fira/upload`, `/report*`) also share one global cap; old limiter windows are pruned; FIRA uploads limited to 10 per minute; sync start limited to the last 3 years (Phase 1A hardening)
 - `/chat` no longer returns 500 for extreme dates: tool dates are limited to 2000-01-01–2099-12-31 and any period that cannot be resolved becomes a tool input error the assistant can recover from
@@ -51,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- HTTP 429 from the AI service is reported as "busy" (`LLM_BUSY`) instead of a generic outage; `LLM_MODEL` and `LLM_API_URL` default per provider; `render.yaml` uses Gemini (`gemini-3.6-flash`) (specs/003-ask-your-money research R5)
 - CA report shows INR amounts with "₹" using an embedded Noto Sans font (SIL OFL 1.1, licence in `backend/app/reports/fonts/OFL.txt`) for the rupee sign only; other text stays in the built-in font (specs/005-ca-report)
 - `frontend/.gitignore` ignores the `AGENTS.md` that `next dev` writes into `frontend/`
 - Backend constants split into `app/common/constants/` (core, leakage, chat, fira, report) behind the same import path; one `SIMULATED_LABEL`; LLM adapter selection moved to `api/deps.py` (removes an import cycle); package-entry imports; ReportLab type stubs handled by a mypy override (Phase 1A hardening)

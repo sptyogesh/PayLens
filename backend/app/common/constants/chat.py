@@ -6,8 +6,6 @@ from app.common.constants.leakage import SIMULATED_LABEL
 
 # --- Ask Your Money chat (003, research R1-R2) ---
 RATE_LIMIT_CHAT: Final = (10, 60)
-LLM_DEFAULT_API_URL: Final = "https://api.anthropic.com"
-LLM_DEFAULT_MODEL: Final = "claude-opus-5-5"
 LLM_API_VERSION: Final = "2026-10-21"
 LLM_TIMEOUT_S: Final = 20.0
 LLM_MAX_TOKENS: Final = 4096

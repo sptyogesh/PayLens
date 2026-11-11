@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from app.ai.answer_rules import (
+    BUSY_ANSWER,
     INCOMPLETE_ANSWER,
     UNAVAILABLE_ANSWER,
     is_tax_question,
@@ -28,6 +29,7 @@ class AgentState:
     tools_used: list[str] = field(default_factory=list)
     text: str = ""
     llm_failed: bool = False
+    llm_busy: bool = False  # the failure was HTTP 429 (rate limit or free-tier quota)
     stop_reason: str = ""
 
 
@@ -55,7 +57,7 @@ def choose_answer(
     if state.results and not any(result.has_data for result in state.results):
         return "no_data", no_data_answer(periods)
     if state.llm_failed:
-        return "fallback", UNAVAILABLE_ANSWER
+        return "fallback", BUSY_ANSWER if state.llm_busy else UNAVAILABLE_ANSWER
     if not state.text:
         return "fallback", ungrounded_answer(periods) if state.results else INCOMPLETE_ANSWER
     if not state.results:

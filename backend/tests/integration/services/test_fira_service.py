@@ -4,7 +4,9 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.common.constants import FIRA_MAX_BYTES
+from app.ai.llm import LlmRequest, LlmResponse
+from app.common.constants import FIRA_MAX_BYTES, LLM_BUSY_CODE
+from app.common.errors import LlmUnavailableError
 from app.common.types import FiraStatus
 from app.fakes.llm_fake import FakeLlm
 from app.models import FiraDocStatus, FiraDocument, Transaction
@@ -68,6 +70,17 @@ def test_e4_and_ai_down_store_nothing(session_factory: Factory, mode: str) -> No
     out = upload(session_factory, FakeLlm(), "fira.pdf", fira_pdf(fake_mode=mode))
     assert out.result.outcome == "failed" and out.result.fira_id is None
     assert "nothing was saved" in out.result.message
+    assert stored_count(session_factory) == 0
+
+
+def test_busy_ai_says_try_again_shortly_and_stores_nothing(session_factory: Factory) -> None:
+    class BusyLlm:
+        def create(self, request: LlmRequest) -> LlmResponse:
+            raise LlmUnavailableError("busy", code=LLM_BUSY_CODE)
+
+    out = upload(session_factory, BusyLlm(), "fira.pdf", fira_pdf())
+    assert out.result.outcome == "failed"
+    assert out.result.message == "The AI is busy, try again shortly. Nothing was saved."
     assert stored_count(session_factory) == 0
 
 
