@@ -56,8 +56,19 @@ jobs:
           npm ci --prefix frontend
           uv sync --directory backend --locked
 
+      # The runner's Ubuntu mirrors sometimes cannot be resolved (seen 2026-11-11: "Temporary
+      # failure resolving 'archive.ubuntu.com'" for 10+ minutes), which is not a problem in our
+      # code. Two tries with system packages (apt, 5 min cap each); then the browser alone: GitHub's
+      # Ubuntu images ship Google Chrome, so the libraries Chromium needs are already installed.
       - name: Install Playwright browser
-        run: npx --prefix frontend playwright install --with-deps chromium
+        run: |
+          for attempt in 1 2; do
+            timeout 300 npx --prefix frontend playwright install --with-deps chromium && exit 0
+            echo "Install with system packages failed (attempt $attempt of 2)"
+            sleep 20
+          done
+          echo "Ubuntu mirrors unavailable: installing the browser without system packages"
+          npx --prefix frontend playwright install chromium
 
       - name: Create e2e database
         env:
