@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- README: live demo URL, demo video, features, tech stack, honest notes (ECB rates as mid-market proxy, simulated 3% spread, Gemini free-tier data use and rate limits, Render wake-up) and a short local-run guide; `docs/DEVPOST.md` submission text
 - `SEED_DEMO_ON_STARTUP` setting (off by default, on in `render.yaml`): loads the labelled demo seed in the startup background thread, idempotent, for hosts without a shell; startup jobs (seed, sync, refresh) run in one thread so `/health` answers at once
 - Free-tier wake-up handling: page loads retry while the backend starts (network error, 502/503/504, up to 90 s) and an app-wide "Waking up the PayLens server…" notice shows until `/health` answers, with a retry when it never does; actions that change data are never retried
 - Frontend build guard (`prebuild`, `scripts/check-public-env.ts`): the build stops when a `NEXT_PUBLIC_*` value is missing or wrong, because Next.js bakes them in at build time
